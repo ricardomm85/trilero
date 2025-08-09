@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import Sidebar from '@/components/Sidebar';
 import CalendarView from '@/components/CalendarView';
-import { EventInput } from '@fullcalendar/core';
+import { EventInput, EventClickArg } from '@fullcalendar/core';
 import { DateClickArg } from '@fullcalendar/interaction';
 
 export default function Home() {
@@ -14,7 +14,14 @@ export default function Home() {
   const handleDateClick = (arg: DateClickArg) => {
     const title = prompt('Enter a note for this day:');
     if (title) {
-      setEvents([...events, { title, date: arg.dateStr }]);
+      // Add a unique ID to each event
+      setEvents([...events, { id: String(Date.now()), title, date: arg.dateStr }]);
+    }
+  };
+
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    if (confirm(`Are you sure you want to delete the note: '${clickInfo.event.title}'?`)) {
+      setEvents(events.filter(event => event.id !== clickInfo.event.id));
     }
   };
 
@@ -28,6 +35,7 @@ export default function Home() {
           selectedRange={range} 
           events={events}
           onDateClick={handleDateClick}
+          onEventClick={handleEventClick}
         />
       </div>
     </main>

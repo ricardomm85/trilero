@@ -25,3 +25,8 @@ This project is a web application for calendar management. The initial phase foc
   - The main content area will feature a large `FullCalendar` instance.
   - The calendar will display the date range selected by the user.
   - Users will be able to click on a day to add a simple text note.
+
+## Development Rules
+
+- **Language**: All code, comments, and documentation must be written in English, even if the user provides instructions in another language.
+- **Commit Messages**: After completing a set of modifications, provide a descriptive commit message in English that summarizes the changes.

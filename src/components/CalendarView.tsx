@@ -6,15 +6,16 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { DateRange } from 'react-day-picker';
 import { differenceInCalendarMonths } from 'date-fns';
-import { EventInput } from '@fullcalendar/core';
+import { EventInput, EventClickArg } from '@fullcalendar/core';
 
 interface CalendarViewProps {
   selectedRange: DateRange | undefined;
   events: EventInput[];
   onDateClick: (arg: DateClickArg) => void;
+  onEventClick: (arg: EventClickArg) => void;
 }
 
-export default function CalendarView({ selectedRange, events, onDateClick }: CalendarViewProps) {
+export default function CalendarView({ selectedRange, events, onDateClick, onEventClick }: CalendarViewProps) {
   if (!selectedRange?.from || !selectedRange?.to) {
     return (
       <div className="flex items-center justify-center h-full bg-gray-50 rounded-lg">
@@ -50,7 +51,8 @@ export default function CalendarView({ selectedRange, events, onDateClick }: Cal
         firstDay={1}
         events={events}
         dateClick={onDateClick}
-        editable={true} // Allows events to be dragged and resized
+        eventClick={onEventClick}
+        editable={true}
       />
     </div>
   );
