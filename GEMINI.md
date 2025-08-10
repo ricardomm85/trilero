@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a web application for calendar management. The initial phase focuses on allowing users to select a date range and view a large calendar where they can add daily notes.
+This project is a web application for calendar management. The initial phase focuses on allowing users to select a date range and view a large calendar where they can add, view, and delete daily notes. All data is persisted in the browser's Local Storage.
 
 ## Technology Stack
 
@@ -20,13 +20,16 @@ This project is a web application for calendar management. The initial phase foc
   - A narrow sidebar on the left for user inputs.
   - A wider main content area on the right for the calendar display.
 - **Date Range Selection**:
-  - The sidebar will contain two `react-day-picker` inputs for selecting a start date and an end date.
+  - The sidebar contains a `react-day-picker` input for selecting a start and end date.
 - **Interactive Calendar**:
-  - The main content area will feature a large `FullCalendar` instance.
-  - The calendar will display the date range selected by the user.
-  - Users will be able to click on a day to add a simple text note.
+  - The main content area features a large, scrollable `FullCalendar` instance.
+  - Users can click on a day to add a simple text note.
+  - Users can click on an existing note to delete it.
+- **Data Persistence**:
+  - The selected date range is automatically saved to the browser's Local Storage and reloaded on the next visit.
+  - All calendar notes are also saved to Local Storage, persisting them between sessions.
 
 ## Development Rules
 
 - **Language**: All code, comments, and documentation must be written in English, even if the user provides instructions in another language.
-- **Commit Messages**: After completing a set of modifications, provide a descriptive commit message in English that summarizes the changes one sentence if possible.
+- **Commit Messages**: After completing a set of modifications, provide a descriptive commit message in English that summarizes the changes.
