@@ -6,7 +6,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { DateRange } from 'react-day-picker';
 import { differenceInCalendarMonths } from 'date-fns';
-import { EventInput, EventClickArg } from '@fullcalendar/core';
+import { EventInput, EventClickArg, DayCellMountArg } from '@fullcalendar/core';
 
 interface CalendarViewProps {
   selectedRange: DateRange | undefined;
