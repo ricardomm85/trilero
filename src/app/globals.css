@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 .day-in-odd-month {
-  background-color: #f9f9f9;
+  background-color: #cccccc;
 }
