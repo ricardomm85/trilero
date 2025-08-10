@@ -53,6 +53,12 @@ export default function CalendarView({ selectedRange, events, onDateClick, onEve
         dateClick={onDateClick}
         eventClick={onEventClick}
         editable={true}
+        dayCellDidMount={(arg: DayCellMountArg) => {
+          const month = arg.date.getMonth();
+          if ((month + 1) % 2 !== 0) {
+            arg.el.classList.add('day-in-odd-month');
+          }
+        }}
       />
     </div>
   );
