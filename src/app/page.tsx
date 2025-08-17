@@ -7,6 +7,7 @@ import CalendarView from '@/components/CalendarView';
 import NoteModal from '@/components/NoteModal';
 import { EventInput, EventClickArg } from '@fullcalendar/core';
 import { DateClickArg } from '@fullcalendar/interaction';
+import { format } from 'date-fns';
 
 const RANGE_STORAGE_KEY = 'calendarDateRange';
 const EVENTS_STORAGE_KEY = 'calendarEvents';
@@ -68,7 +69,7 @@ export default function Home() {
 
   const handleSaveNote = (note: string, color: string) => {
     if (selectedDate) {
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
       setEvents([
         ...events,
         {
