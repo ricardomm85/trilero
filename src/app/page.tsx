@@ -8,6 +8,7 @@ import NoteModal from '@/components/NoteModal';
 import { EventInput, EventClickArg } from '@fullcalendar/core';
 import { DateClickArg } from '@fullcalendar/interaction';
 import { format } from 'date-fns';
+import SpecialDayModal from '@/components/SpecialDayModal';
 
 const RANGE_STORAGE_KEY = 'calendarDateRange';
 const EVENTS_STORAGE_KEY = 'calendarEvents';
@@ -19,6 +20,8 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [editingEvent, setEditingEvent] = useState<EventInput | null>(null);
+  const [specialDays, setSpecialDays] = useState<string[]>([]);
+  const [isSpecialDayModalOpen, setIsSpecialDayModalOpen] = useState(false);
 
   // Load initial data from Local Storage on mount
   useEffect(() => {
@@ -40,6 +43,12 @@ export default function Home() {
       setEvents(JSON.parse(savedEventsJSON));
     }
 
+    // Load Special Days
+    const savedSpecialDaysJSON = localStorage.getItem('specialDays');
+    if (savedSpecialDaysJSON) {
+      setSpecialDays(JSON.parse(savedSpecialDaysJSON));
+    }
+
     setIsInitialLoad(false);
   }, []);
 
@@ -56,6 +65,35 @@ export default function Home() {
     if (isInitialLoad) return; // Don't save during initial load
     localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
   }, [events, isInitialLoad]);
+
+  // Save special days to Local Storage whenever they change
+  useEffect(() => {
+    if (isInitialLoad) return; // Don't save during initial load
+    localStorage.setItem('specialDays', JSON.stringify(specialDays));
+  }, [specialDays, isInitialLoad]);
+
+  const addSpecialDay = (date: string) => {
+    if (!specialDays.includes(date)) {
+      setSpecialDays((prevDays) => [...prevDays, date].sort());
+    }
+  };
+
+  const removeSpecialDay = (date: string) => {
+    setSpecialDays((prevDays) => prevDays.filter((day) => day !== date));
+  };
+
+  const handleOpenSpecialDayModal = () => {
+    setIsSpecialDayModalOpen(true);
+  };
+
+  const handleCloseSpecialDayModal = () => {
+    setIsSpecialDayModalOpen(false);
+  };
+
+  const handleSaveSpecialDay = (date: string) => {
+    addSpecialDay(date);
+    setIsSpecialDayModalOpen(false);
+  };
 
   const handleDateClick = (arg: DateClickArg) => {
     setSelectedDate(arg.date);
@@ -125,7 +163,7 @@ export default function Home() {
   return (
     <main className="flex flex-col md:flex-row h-screen bg-white">
       <div className="w-full md:w-1/4 h-full bg-gray-50 md:border-r p-4">
-        <Sidebar selectedRange={range} onRangeChange={setRange} events={events} />
+        <Sidebar selectedRange={range} onRangeChange={setRange} events={events} specialDays={specialDays} onAddSpecialDay={addSpecialDay} onRemoveSpecialDay={removeSpecialDay} onOpenSpecialDayModal={handleOpenSpecialDayModal} />
       </div>
       <div className="w-full md:w-3/4 h-full p-4">
         <CalendarView
@@ -133,6 +171,7 @@ export default function Home() {
           events={events}
           onDateClick={handleDateClick}
           onEventClick={handleEventClick}
+          specialDays={specialDays}
         />
       </div>
       <NoteModal
@@ -142,6 +181,11 @@ export default function Home() {
         onDelete={handleDeleteNote}
         selectedDate={selectedDate}
         event={editingEvent}
+      />
+      <SpecialDayModal
+        isOpen={isSpecialDayModalOpen}
+        onClose={handleCloseSpecialDayModal}
+        onSave={handleSaveSpecialDay}
       />
     </main>
   );

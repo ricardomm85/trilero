@@ -5,7 +5,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { DateRange } from 'react-day-picker';
-import { differenceInCalendarMonths } from 'date-fns';
+import { differenceInCalendarMonths, format } from 'date-fns';
 import { EventInput, EventClickArg, DayCellMountArg } from '@fullcalendar/core';
 
 interface CalendarViewProps {
@@ -13,9 +13,10 @@ interface CalendarViewProps {
   events: EventInput[];
   onDateClick: (arg: DateClickArg) => void;
   onEventClick: (arg: EventClickArg) => void;
+  specialDays: string[];
 }
 
-export default function CalendarView({ selectedRange, events, onDateClick, onEventClick }: CalendarViewProps) {
+export default function CalendarView({ selectedRange, events, onDateClick, onEventClick, specialDays }: CalendarViewProps) {
   if (!selectedRange?.from || !selectedRange?.to) {
     return (
       <div className="flex items-center justify-center h-full bg-gray-50 rounded-lg">
@@ -29,6 +30,7 @@ export default function CalendarView({ selectedRange, events, onDateClick, onEve
   return (
     <div className="h-full overflow-y-auto">
       <FullCalendar
+        key={JSON.stringify(specialDays)}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         headerToolbar={{
           left: 'title',
@@ -65,6 +67,12 @@ export default function CalendarView({ selectedRange, events, onDateClick, onEve
           const month = arg.date.getMonth();
           if ((month + 1) % 2 !== 0) {
             arg.el.classList.add('day-in-odd-month');
+          }
+
+          // Highlight special days
+          const dateStr = format(arg.date, 'yyyy-MM-dd');
+          if (specialDays.includes(dateStr)) {
+            arg.el.style.backgroundColor = '#FFFACD'; // Pale yellow
           }
         }}
       />
