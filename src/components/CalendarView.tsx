@@ -54,6 +54,14 @@ export default function CalendarView({ selectedRange, events, onDateClick, onEve
         eventClick={onEventClick}
         editable={true}
         dayCellDidMount={(arg: DayCellMountArg) => {
+          const dayOfWeek = arg.date.getDay();
+          if (dayOfWeek === 0 || dayOfWeek === 6) { // 0 for Sunday, 6 for Saturday
+            const dayNumberEl = arg.el.querySelector('.fc-daygrid-day-number');
+            if (dayNumberEl) {
+              (dayNumberEl as HTMLElement).style.fontWeight = 'bold';
+              (dayNumberEl as HTMLElement).style.color = '#FF0000';
+            }
+          }
           const month = arg.date.getMonth();
           if ((month + 1) % 2 !== 0) {
             arg.el.classList.add('day-in-odd-month');
