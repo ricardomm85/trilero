@@ -18,6 +18,7 @@ export default function Home() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [editingEvent, setEditingEvent] = useState<EventInput | null>(null);
 
   // Load initial data from Local Storage on mount
   useEffect(() => {
@@ -58,17 +59,37 @@ export default function Home() {
 
   const handleDateClick = (arg: DateClickArg) => {
     setSelectedDate(arg.date);
+    setEditingEvent(null);
     setIsModalOpen(true);
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
-    if (confirm(`Are you sure you want to delete the note: '${clickInfo.event.title}'?`)) {
-      setEvents(events.filter(event => event.id !== clickInfo.event.id));
-    }
+    setEditingEvent({
+      id: clickInfo.event.id,
+      title: clickInfo.event.title,
+      start: clickInfo.event.start || undefined,
+      end: clickInfo.event.end || undefined,
+      allDay: clickInfo.event.allDay,
+      backgroundColor: clickInfo.event.backgroundColor,
+      borderColor: clickInfo.event.borderColor,
+      textColor: clickInfo.event.textColor,
+    });
+    setSelectedDate(clickInfo.event.start);
+    setIsModalOpen(true);
   };
 
   const handleSaveNote = (note: string, color: string) => {
-    if (selectedDate) {
+    if (editingEvent) {
+      // Update existing event
+      setEvents(
+        events.map(event =>
+          event.id === editingEvent.id
+            ? { ...event, title: note, backgroundColor: color, borderColor: color }
+            : event
+        )
+      );
+    } else if (selectedDate) {
+      // Create new event
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
       setEvents([
         ...events,
@@ -83,7 +104,23 @@ export default function Home() {
     }
     setIsModalOpen(false);
     setSelectedDate(null);
+    setEditingEvent(null);
   };
+
+  const handleDeleteNote = () => {
+    if (editingEvent) {
+      setEvents(events.filter(event => event.id !== editingEvent.id));
+      setIsModalOpen(false);
+      setSelectedDate(null);
+      setEditingEvent(null);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDate(null);
+    setEditingEvent(null);
+  }
 
   return (
     <main className="flex h-screen bg-white">
@@ -100,9 +137,11 @@ export default function Home() {
       </div>
       <NoteModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onSave={handleSaveNote}
+        onDelete={handleDeleteNote}
         selectedDate={selectedDate}
+        event={editingEvent}
       />
     </main>
   );
