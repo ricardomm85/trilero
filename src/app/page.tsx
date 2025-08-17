@@ -88,7 +88,7 @@ export default function Home() {
   return (
     <main className="flex h-screen bg-white">
       <div className="w-1/4 h-full bg-gray-50 border-r p-4">
-        <Sidebar selectedRange={range} onRangeChange={setRange} />
+        <Sidebar selectedRange={range} onRangeChange={setRange} events={events} />
       </div>
       <div className="w-3/4 h-full p-4">
         <CalendarView

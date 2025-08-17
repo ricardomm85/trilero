@@ -34,3 +34,4 @@ This project is a web application for calendar management. The initial phase foc
 - **Language**: All code, comments, and documentation must be written in English, even if the user provides instructions in another language.
 - **Commit Messages**: After completing a set of modifications, provide a descriptive commit message in English that summarizes the changes.
 - **Development Server**: Do not run `npm run dev` or any other development server. The user will handle running the application.
+- **Commits**: Do not commit changes. The user will handle all commits.
