@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { format } from 'date-fns';
 
 interface NoteModalProps {
   isOpen: boolean;
@@ -33,11 +34,20 @@ export default function NoteModal({ isOpen, onClose, onSave, selectedDate }: Not
     }
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Add Note for {selectedDate?.toLocaleDateString()}</h3>
+          <h3 className="text-lg font-semibold">Add Note for {selectedDate ? format(selectedDate, 'dd/MM/yyyy') : ''}</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800">&times;</button>
         </div>
         <div>

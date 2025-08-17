@@ -33,7 +33,7 @@ export default function CalendarView({ selectedRange, events, onDateClick, onEve
         headerToolbar={{
           left: 'title',
           center: '',
-          right: 'today'
+          right: ''
         }}
         initialDate={selectedRange.from}
         validRange={{
