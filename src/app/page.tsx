@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { DateRange } from 'react-day-picker';
 import Sidebar from '@/components/Sidebar';
 import CalendarView from '@/components/CalendarView';
+import NoteModal from '@/components/NoteModal';
 import { EventInput, EventClickArg } from '@fullcalendar/core';
 import { DateClickArg } from '@fullcalendar/interaction';
 
@@ -14,6 +15,8 @@ export default function Home() {
   const [range, setRange] = useState<DateRange | undefined>();
   const [events, setEvents] = useState<EventInput[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Load initial data from Local Storage on mount
   useEffect(() => {
@@ -53,10 +56,8 @@ export default function Home() {
   }, [events, isInitialLoad]);
 
   const handleDateClick = (arg: DateClickArg) => {
-    const title = prompt('Enter a note for this day:');
-    if (title) {
-      setEvents([...events, { id: String(Date.now()), title, date: arg.dateStr }]);
-    }
+    setSelectedDate(arg.date);
+    setIsModalOpen(true);
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
@@ -65,19 +66,43 @@ export default function Home() {
     }
   };
 
+  const handleSaveNote = (note: string, color: string) => {
+    if (selectedDate) {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      setEvents([
+        ...events,
+        {
+          id: String(Date.now()),
+          title: note,
+          date: dateStr,
+          backgroundColor: color,
+          borderColor: color,
+        },
+      ]);
+    }
+    setIsModalOpen(false);
+    setSelectedDate(null);
+  };
+
   return (
     <main className="flex h-screen bg-white">
       <div className="w-1/4 h-full bg-gray-50 border-r p-4">
         <Sidebar selectedRange={range} onRangeChange={setRange} />
       </div>
       <div className="w-3/4 h-full p-4">
-        <CalendarView 
-          selectedRange={range} 
+        <CalendarView
+          selectedRange={range}
           events={events}
           onDateClick={handleDateClick}
           onEventClick={handleEventClick}
         />
       </div>
+      <NoteModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveNote}
+        selectedDate={selectedDate}
+      />
     </main>
   );
 }
