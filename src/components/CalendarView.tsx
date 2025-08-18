@@ -7,6 +7,7 @@ import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { DateRange } from 'react-day-picker';
 import { differenceInCalendarMonths, format } from 'date-fns';
 import { EventInput, EventClickArg, DayCellMountArg } from '@fullcalendar/core';
+import PdfExportButton from './PdfExportButton';
 
 interface CalendarViewProps {
   selectedRange: DateRange | undefined;
@@ -29,53 +30,62 @@ export default function CalendarView({ selectedRange, events, onDateClick, onEve
 
   return (
     <div className="h-full overflow-y-auto">
-      <FullCalendar
-        key={JSON.stringify(specialDays)}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        headerToolbar={{
-          left: 'title',
-          center: '',
-          right: ''
-        }}
-        initialDate={selectedRange.from}
-        validRange={{
-          start: selectedRange.from,
-          end: selectedRange.to
-        }}
-        views={{
-          multiMonth: {
-            type: 'dayGrid',
-            duration: { months: monthCount > 0 ? monthCount : 1 },
-          }
-        }}
-        initialView={'multiMonth'}
-        height={'auto'}
-        firstDay={1}
-        events={events}
-        dateClick={onDateClick}
-        eventClick={onEventClick}
-        editable={true}
-        dayCellDidMount={(arg: DayCellMountArg) => {
-          const dayOfWeek = arg.date.getDay();
-          if (dayOfWeek === 0 || dayOfWeek === 6) { // 0 for Sunday, 6 for Saturday
-            const dayNumberEl = arg.el.querySelector('.fc-daygrid-day-number');
-            if (dayNumberEl) {
-              (dayNumberEl as HTMLElement).style.fontWeight = 'bold';
-              (dayNumberEl as HTMLElement).style.color = '#FF0000';
+      <div className="flex justify-end p-4">
+        <PdfExportButton
+          selectedRange={selectedRange}
+          events={events}
+          specialDays={specialDays}
+        />
+      </div>
+      <div id="calendar-to-print">
+        <FullCalendar
+          key={JSON.stringify(specialDays)}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          headerToolbar={{
+            left: 'title',
+            center: '',
+            right: ''
+          }}
+          initialDate={selectedRange.from}
+          validRange={{
+            start: selectedRange.from,
+            end: selectedRange.to
+          }}
+          views={{
+            multiMonth: {
+              type: 'dayGrid',
+              duration: { months: monthCount > 0 ? monthCount : 1 },
             }
-          }
-          const month = arg.date.getMonth();
-          if ((month + 1) % 2 !== 0) {
-            arg.el.classList.add('day-in-odd-month');
-          }
+          }}
+          initialView={'multiMonth'}
+          height={'auto'}
+          firstDay={1}
+          events={events}
+          dateClick={onDateClick}
+          eventClick={onEventClick}
+          editable={true}
+          dayCellDidMount={(arg: DayCellMountArg) => {
+            const dayOfWeek = arg.date.getDay();
+            if (dayOfWeek === 0 || dayOfWeek === 6) { // 0 for Sunday, 6 for Saturday
+              const dayNumberEl = arg.el.querySelector('.fc-daygrid-day-number');
+              if (dayNumberEl) {
+                (dayNumberEl as HTMLElement).style.fontWeight = 'bold';
+                (dayNumberEl as HTMLElement).style.color = '#FF0000';
+              }
+            }
+            const month = arg.date.getMonth();
+            if ((month + 1) % 2 !== 0) {
+              arg.el.classList.add('day-in-odd-month');
+            }
 
-          // Highlight special days
-          const dateStr = format(arg.date, 'yyyy-MM-dd');
-          if (specialDays.includes(dateStr)) {
-            arg.el.style.backgroundColor = '#FFFACD'; // Pale yellow
-          }
-        }}
-      />
+            // Highlight special days
+            const dateStr = format(arg.date, 'yyyy-MM-dd');
+            if (specialDays.includes(dateStr)) {
+              arg.el.style.backgroundColor = '#FFFACD'; // Pale yellow
+            }
+          }}
+        />
+      </div>
     </div>
   );
 }

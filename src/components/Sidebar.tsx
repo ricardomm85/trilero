@@ -10,12 +10,11 @@ interface SidebarProps {
   onRangeChange: (range: DateRange | undefined) => void;
   events: EventInput[];
   specialDays: string[];
-  onAddSpecialDay: (date: string) => void;
   onRemoveSpecialDay: (date: string) => void;
   onOpenSpecialDayModal: () => void;
 }
 
-export default function Sidebar({ selectedRange, onRangeChange, events, specialDays, onAddSpecialDay, onRemoveSpecialDay, onOpenSpecialDayModal }: SidebarProps) {
+export default function Sidebar({ selectedRange, onRangeChange, events, specialDays, onRemoveSpecialDay, onOpenSpecialDayModal }: SidebarProps) {
   const handleAddSpecialDay = () => {
     onOpenSpecialDayModal();
   };
