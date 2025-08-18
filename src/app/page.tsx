@@ -9,32 +9,32 @@ import { EventInput } from '@fullcalendar/core';
 import { DateClickArg } from '@fullcalendar/interaction';
 import { format } from 'date-fns';
 import SpecialDayModal from '@/components/SpecialDayModal';
-import NewNoteModal from '@/components/NewNoteModal';
-import SelectNoteModal from '@/components/SelectNoteModal';
+import NewPersonModal from '@/components/NewPersonModal';
+import SelectPersonModal from '@/components/SelectPersonModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
-import EditNoteModal from '@/components/EditNoteModal';
-import { Note, DayNote } from '@/types';
+import EditPersonModal from '@/components/EditPersonModal';
+import { Person, DayPerson } from '@/types';
 import { nanoid } from 'nanoid';
 
 const RANGE_STORAGE_KEY = 'calendarDateRange';
-const NOTES_STORAGE_KEY = 'calendarNotes';
-const DAY_NOTES_STORAGE_KEY = 'calendarDayNotes';
+const PERSONS_STORAGE_KEY = 'calendarPersons';
+const DAY_PERSONS_STORAGE_KEY = 'calendarDayPersons';
 
 export default function Home() {
   const [range, setRange] = useState<DateRange | undefined>();
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [dayNotes, setDayNotes] = useState<DayNote[]>([]);
+  const [persons, setPersons] = useState<Person[]>([]);
+  const [dayPersons, setDayPersons] = useState<DayPerson[]>([]);
   const [events, setEvents] = useState<EventInput[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [specialDays, setSpecialDays] = useState<string[]>([]);
   const [isSpecialDayModalOpen, setIsSpecialDayModalOpen] = useState(false);
-  const [isNewNoteModalOpen, setIsNewNoteModalOpen] = useState(false);
-  const [isSelectNoteModalOpen, setIsSelectNoteModalOpen] = useState(false);
+  const [isNewPersonModalOpen, setIsNewPersonModalOpen] = useState(false);
+  const [isSelectPersonModalOpen, setIsSelectPersonModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false);
-  const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
-  const [noteToEdit, setNoteToEdit] = useState<Note | null>(null);
+  const [isEditPersonModalOpen, setIsEditPersonModalOpen] = useState(false);
+  const [personToDelete, setPersonToDelete] = useState<Person | null>(null);
+  const [personToEdit, setPersonToEdit] = useState<Person | null>(null);
 
   // Load initial data from Local Storage on mount
   useEffect(() => {
@@ -50,16 +50,16 @@ export default function Home() {
       }
     }
 
-    // Load Notes
-    const savedNotesJSON = localStorage.getItem(NOTES_STORAGE_KEY);
-    if (savedNotesJSON) {
-      setNotes(JSON.parse(savedNotesJSON));
+    // Load Persons
+    const savedPersonsJSON = localStorage.getItem(PERSONS_STORAGE_KEY);
+    if (savedPersonsJSON) {
+      setPersons(JSON.parse(savedPersonsJSON));
     }
 
-    // Load DayNotes
-    const savedDayNotesJSON = localStorage.getItem(DAY_NOTES_STORAGE_KEY);
-    if (savedDayNotesJSON) {
-      setDayNotes(JSON.parse(savedDayNotesJSON));
+    // Load DayPersons
+    const savedDayPersonsJSON = localStorage.getItem(DAY_PERSONS_STORAGE_KEY);
+    if (savedDayPersonsJSON) {
+      setDayPersons(JSON.parse(savedDayPersonsJSON));
     }
 
     // Load Special Days
@@ -79,17 +79,17 @@ export default function Home() {
     }
   }, [range, isInitialLoad]);
 
-  // Save notes to Local Storage whenever they change
+  // Save persons to Local Storage whenever they change
   useEffect(() => {
     if (isInitialLoad) return;
-    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
-  }, [notes, isInitialLoad]);
+    localStorage.setItem(PERSONS_STORAGE_KEY, JSON.stringify(persons));
+  }, [persons, isInitialLoad]);
 
-  // Save dayNotes to Local Storage whenever they change
+  // Save dayPersons to Local Storage whenever they change
   useEffect(() => {
     if (isInitialLoad) return;
-    localStorage.setItem(DAY_NOTES_STORAGE_KEY, JSON.stringify(dayNotes));
-  }, [dayNotes, isInitialLoad]);
+    localStorage.setItem(DAY_PERSONS_STORAGE_KEY, JSON.stringify(dayPersons));
+  }, [dayPersons, isInitialLoad]);
 
   // Save special days to Local Storage whenever they change
   useEffect(() => {
@@ -97,22 +97,22 @@ export default function Home() {
     localStorage.setItem('specialDays', JSON.stringify(specialDays));
   }, [specialDays, isInitialLoad]);
 
-  // Generate events from dayNotes and notes
+  // Generate events from dayPersons and persons
   useEffect(() => {
-    const newEvents = dayNotes.map(dayNote => {
-      const note = notes.find(n => n.id === dayNote.noteId);
-      if (!note) return null;
+    const newEvents = dayPersons.map(dayPerson => {
+      const person = persons.find(p => p.id === dayPerson.personId);
+      if (!person) return null;
       return {
-        id: `${dayNote.date}-${dayNote.noteId}`,
-        title: note.text,
-        date: dayNote.date,
-        backgroundColor: note.color,
-        borderColor: note.color,
+        id: `${dayPerson.date}-${dayPerson.personId}`,
+        title: person.name,
+        date: dayPerson.date,
+        backgroundColor: person.color,
+        borderColor: person.color,
         textColor: 'white',
       };
     }).filter(Boolean) as EventInput[];
     setEvents(newEvents);
-  }, [dayNotes, notes]);
+  }, [dayPersons, persons]);
 
   const addSpecialDay = (date: string) => {
     if (!specialDays.includes(date)) {
@@ -139,66 +139,66 @@ export default function Home() {
 
   const handleDateClick = (arg: DateClickArg) => {
     setSelectedDate(arg.date);
-    setIsSelectNoteModalOpen(true);
+    setIsSelectPersonModalOpen(true);
   };
 
-  const handleSaveNewNote = (note: Omit<Note, 'id'>) => {
-    const newNote = { ...note, id: nanoid() };
-    setNotes(prevNotes => [...prevNotes, newNote]);
-    setIsNewNoteModalOpen(false);
+  const handleSaveNewPerson = (person: Omit<Person, 'id'>) => {
+    const newPerson = { ...person, id: nanoid() };
+    setPersons(prevPersons => [...prevPersons, newPerson]);
+    setIsNewPersonModalOpen(false);
   };
 
-  const handleSelectNote = (noteId: string) => {
+  const handleSelectPerson = (personId: string) => {
     if (selectedDate) {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const existingDayNoteIndex = dayNotes.findIndex(dn => dn.date === dateStr);
+      const existingDayPersonIndex = dayPersons.findIndex(dp => dp.date === dateStr);
 
-      if (existingDayNoteIndex > -1) {
-        // Update existing day note
-        const updatedDayNotes = [...dayNotes];
-        updatedDayNotes[existingDayNoteIndex] = { ...updatedDayNotes[existingDayNoteIndex], noteId };
-        setDayNotes(updatedDayNotes);
+      if (existingDayPersonIndex > -1) {
+        // Update existing day person
+        const updatedDayPersons = [...dayPersons];
+        updatedDayPersons[existingDayPersonIndex] = { ...updatedDayPersons[existingDayPersonIndex], personId };
+        setDayPersons(updatedDayPersons);
       } else {
-        // Create new day note
-        setDayNotes([...dayNotes, { date: dateStr, noteId }]);
+        // Create new day person
+        setDayPersons([...dayPersons, { date: dateStr, personId }]);
       }
     }
-    setIsSelectNoteModalOpen(false);
+    setIsSelectPersonModalOpen(false);
     setSelectedDate(null);
   };
 
-  const handleDeleteDayNote = () => {
+  const handleDeleteDayPerson = () => {
     if (selectedDate) {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      setDayNotes(dayNotes.filter(dn => dn.date !== dateStr));
+      setDayPersons(dayPersons.filter(dp => dp.date !== dateStr));
     }
-    setIsSelectNoteModalOpen(false);
+    setIsSelectPersonModalOpen(false);
     setSelectedDate(null);
   };
 
-  const openDeleteConfirmation = (note: Note) => {
-    setNoteToDelete(note);
+  const openDeleteConfirmation = (person: Person) => {
+    setPersonToDelete(person);
     setIsConfirmationModalOpen(true);
   };
 
-  const handleDeleteNote = () => {
-    if (noteToDelete) {
-      setNotes(notes.filter(n => n.id !== noteToDelete.id));
-      setDayNotes(dayNotes.filter(dn => dn.noteId !== noteToDelete.id));
-      setNoteToDelete(null);
+  const handleDeletePerson = () => {
+    if (personToDelete) {
+      setPersons(persons.filter(p => p.id !== personToDelete.id));
+      setDayPersons(dayPersons.filter(dp => dp.personId !== personToDelete.id));
+      setPersonToDelete(null);
     }
     setIsConfirmationModalOpen(false);
   };
 
-  const openEditNoteModal = (note: Note) => {
-    setNoteToEdit(note);
-    setIsEditNoteModalOpen(true);
+  const openEditPersonModal = (person: Person) => {
+    setPersonToEdit(person);
+    setIsEditPersonModalOpen(true);
   };
 
-  const handleEditNote = (editedNote: Note) => {
-    setNotes(notes.map(n => n.id === editedNote.id ? editedNote : n));
-    setNoteToEdit(null);
-    setIsEditNoteModalOpen(false);
+  const handleEditPerson = (editedPerson: Person) => {
+    setPersons(persons.map(p => p.id === editedPerson.id ? editedPerson : p));
+    setPersonToEdit(null);
+    setIsEditPersonModalOpen(false);
   };
 
   return (
@@ -207,14 +207,14 @@ export default function Home() {
         <Sidebar
           selectedRange={range}
           onRangeChange={setRange}
-          notes={notes}
+          persons={persons}
           specialDays={specialDays}
           onAddSpecialDay={addSpecialDay}
           onRemoveSpecialDay={removeSpecialDay}
           onOpenSpecialDayModal={handleOpenSpecialDayModal}
-          onOpenNewNoteModal={() => setIsNewNoteModalOpen(true)}
-          onDeleteNote={openDeleteConfirmation}
-          onEditNote={openEditNoteModal}
+          onOpenNewPersonModal={() => setIsNewPersonModalOpen(true)}
+          onDeletePerson={openDeleteConfirmation}
+          onEditPerson={openEditPersonModal}
           events={events}
         />
       </div>
@@ -227,17 +227,17 @@ export default function Home() {
           specialDays={specialDays}
         />
       </div>
-      <NewNoteModal
-        isOpen={isNewNoteModalOpen}
-        onClose={() => setIsNewNoteModalOpen(false)}
-        onSave={handleSaveNewNote}
+      <NewPersonModal
+        isOpen={isNewPersonModalOpen}
+        onClose={() => setIsNewPersonModalOpen(false)}
+        onSave={handleSaveNewPerson}
       />
-      <SelectNoteModal
-        isOpen={isSelectNoteModalOpen}
-        onClose={() => setIsSelectNoteModalOpen(false)}
-        onSelect={handleSelectNote}
-        onDelete={handleDeleteDayNote}
-        notes={notes}
+      <SelectPersonModal
+        isOpen={isSelectPersonModalOpen}
+        onClose={() => setIsSelectPersonModalOpen(false)}
+        onSelect={handleSelectPerson}
+        onDelete={handleDeleteDayPerson}
+        persons={persons}
       />
       <SpecialDayModal
         isOpen={isSpecialDayModalOpen}
@@ -247,15 +247,15 @@ export default function Home() {
       <ConfirmationModal
         isOpen={isConfirmationModalOpen}
         onClose={() => setIsConfirmationModalOpen(false)}
-        onConfirm={handleDeleteNote}
-        title="Delete Note"
-        message={`Are you sure you want to delete the note: "${noteToDelete?.text}"? This will remove the note from all assigned days.`}
+        onConfirm={handleDeletePerson}
+        title="Delete Person"
+        message={`Are you sure you want to delete the person: "${personToDelete?.name}"? This will remove the person from all assigned days.`}
       />
-      <EditNoteModal
-        isOpen={isEditNoteModalOpen}
-        onClose={() => setIsEditNoteModalOpen(false)}
-        onSave={handleEditNote}
-        note={noteToEdit}
+      <EditPersonModal
+        isOpen={isEditPersonModalOpen}
+        onClose={() => setIsEditPersonModalOpen(false)}
+        onSave={handleEditPerson}
+        person={personToEdit}
       />
     </main>
   );

@@ -2,17 +2,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Note } from '@/types';
-
-interface NewNoteModalProps {
+import { Person } from '@/types';
+interface NewPersonModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (note: Omit<Note, 'id'>) => void;
+  onSave: (person: Omit<Person, 'id'>) => void;
 }
 
 const colors = ['#F87171', '#FBBF24', '#34D399', '#60A5FA', '#A78BFA', '#F472B6'];
 
-export default function NewNoteModal({ isOpen, onClose, onSave }: NewNoteModalProps) {
+export default function NewPersonModal({ isOpen, onClose, onSave }: NewPersonModalProps) {
   const [text, setText] = useState('');
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -29,12 +28,12 @@ export default function NewNoteModal({ isOpen, onClose, onSave }: NewNoteModalPr
 
   if (!isOpen) return null;
 
-  const handleSaveNote = () => {
+  const handleSavePerson = () => {
     if (text.trim()) {
       const parts = text.split(/[\n]/).map(part => part.trim()).filter(part => part.length > 0);
       if (parts.length > 0) {
         parts.forEach(part => {
-          onSave({text: part, color: selectedColor});
+          onSave({name: part, color: selectedColor});
         });
         setText('');
         onClose();
@@ -55,16 +54,14 @@ export default function NewNoteModal({ isOpen, onClose, onSave }: NewNoteModalPr
     >
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">New Note</h3>
+          <h3 className="text-lg font-semibold">New Person</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800">&times;</button>
         </div>
         <div>
-          <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-2">
-            Enter the note text:
-          </label>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Person&apos;s Name</label>
           <textarea
             ref={textareaRef}
-            id="note"
+            id="personName"
             value={text}
             onChange={(e) => setText(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md"
@@ -90,7 +87,7 @@ export default function NewNoteModal({ isOpen, onClose, onSave }: NewNoteModalPr
           <button onClick={onClose} className="px-4 py-2 rounded-md text-gray-600 bg-gray-100 hover:bg-gray-200">
             Cancel
           </button>
-          <button onClick={handleSaveNote} className="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700">
+          <button onClick={handleSavePerson} className="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700">
             Save
           </button>
         </div>
@@ -98,3 +95,4 @@ export default function NewNoteModal({ isOpen, onClose, onSave }: NewNoteModalPr
     </div>
   );
 }
+

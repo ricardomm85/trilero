@@ -1,11 +1,11 @@
 
-export interface Note {
+export interface Person {
   id: string;
-  text: string;
+  name: string;
   color: string;
 }
 
-export interface DayNote {
+export interface DayPerson {
   date: string;
-  noteId: string;
+  personId: string;
 }

@@ -1,16 +1,16 @@
 'use client';
 
-import { Note } from '@/types';
+import { Person } from '@/types';
 
-interface SelectNoteModalProps {
+interface SelectPersonModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (noteId: string) => void;
+  onSelect: (personId: string) => void;
   onDelete: () => void;
-  notes: Note[];
+  persons: Person[];
 }
 
-export default function SelectNoteModal({ isOpen, onClose, onSelect, onDelete, notes }: SelectNoteModalProps) {
+export default function SelectPersonModal({ isOpen, onClose, onSelect, onDelete, persons }: SelectPersonModalProps) {
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -26,18 +26,18 @@ export default function SelectNoteModal({ isOpen, onClose, onSelect, onDelete, n
     >
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Select a Note</h3>
+          <h3 className="text-lg font-semibold">Select a Person</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800">&times;</button>
         </div>
         <div className="space-y-2">
-          {notes.map(note => (
+          {persons.map(person => (
             <div
-              key={note.id}
-              onClick={() => onSelect(note.id)}
+              key={person.id}
+              onClick={() => onSelect(person.id)}
               className="p-3 rounded-md cursor-pointer hover:bg-gray-100 border"
-              style={{ backgroundColor: note.color, color: 'white' }}
+              style={{ backgroundColor: person.color, color: 'white' }}
             >
-              {note.text}
+              {person.name}
             </div>
           ))}
         </div>
@@ -46,7 +46,7 @@ export default function SelectNoteModal({ isOpen, onClose, onSelect, onDelete, n
             onClick={onDelete}
             className="px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700"
           >
-            Delete Note for this Day
+            Delete Person for this Day
           </button>
         </div>
       </div>

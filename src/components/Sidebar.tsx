@@ -3,25 +3,25 @@
 
 import { DateRange, DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
-import { Note } from '@/types';
-import NotesTable from './NotesTable';
+import { Person } from '@/types';
+import PersonsTable from './PersonsTable';
 import { EventInput } from '@fullcalendar/core';
 
 interface SidebarProps {
   selectedRange: DateRange | undefined;
   onRangeChange: (range: DateRange | undefined) => void;
-  notes: Note[];
+  persons: Person[];
   specialDays: string[];
   onAddSpecialDay: (date: string) => void;
   onRemoveSpecialDay: (date: string) => void;
   onOpenSpecialDayModal: () => void;
-  onOpenNewNoteModal: () => void;
-  onDeleteNote: (note: Note) => void;
-  onEditNote: (note: Note) => void;
+  onOpenNewPersonModal: () => void;
+  onDeletePerson: (person: Person) => void;
+  onEditPerson: (person: Person) => void;
   events: EventInput[];
 }
 
-export default function Sidebar({ selectedRange, onRangeChange, notes, specialDays, onAddSpecialDay, onRemoveSpecialDay, onOpenSpecialDayModal, onOpenNewNoteModal, onDeleteNote, onEditNote, events }: SidebarProps) {
+export default function Sidebar({ selectedRange, onRangeChange, persons, specialDays, onRemoveSpecialDay, onOpenSpecialDayModal, onOpenNewPersonModal, onDeletePerson, onEditPerson, events }: SidebarProps) {
   const handleAddSpecialDay = () => {
     onOpenSpecialDayModal();
   };
@@ -37,33 +37,33 @@ export default function Sidebar({ selectedRange, onRangeChange, notes, specialDa
         weekStartsOn={1} // Start week on Monday
       />
 
-      <NotesTable events={events} />
+      <PersonsTable events={events} />
 
       <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-2">Notes</h2>
+        <h2 className="text-lg font-semibold mb-2">Persons</h2>
         <button
-          onClick={onOpenNewNoteModal}
+          onClick={onOpenNewPersonModal}
           className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4 w-full"
         >
-          New Note
+          New Person
         </button>
         {
-          notes.length === 0 ? (
-            <p className="text-gray-500">No notes created yet.</p>
+          persons.length === 0 ? (
+            <p className="text-gray-500">No persons created yet.</p>
           ) : (
             <ul className="space-y-2">
-              {notes.map((note) => (
-                <li key={note.id} className="flex justify-between items-center p-2 rounded-md" style={{ backgroundColor: note.color, color: 'white' }}>
-                  <span>{note.text}</span>
+              {persons.map((person) => (
+                <li key={person.id} className="flex justify-between items-center p-2 rounded-md" style={{ backgroundColor: person.color, color: 'white' }}>
+                  <span>{person.name}</span>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => onEditNote(note)}
+                      onClick={() => onEditPerson(person)}
                       className="ml-2 text-white hover:text-blue-500 text-sm"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => onDeleteNote(note)}
+                      onClick={() => onDeletePerson(person)}
                       className="ml-2 text-white hover:text-red-500 text-sm"
                     >
                       Delete
@@ -103,7 +103,8 @@ export default function Sidebar({ selectedRange, onRangeChange, notes, specialDa
                     Delete
                   </button>
                 </li>
-              ))}
+              ))
+            }
             </ul>
           )
         }

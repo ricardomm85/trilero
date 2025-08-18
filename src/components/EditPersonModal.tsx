@@ -2,37 +2,37 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Note } from '@/types';
+import { Person } from '@/types';
 
-interface EditNoteModalProps {
+interface EditPersonModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (note: Note) => void;
-  note: Note | null;
+  onSave: (person: Person) => void;
+  person: Person | null;
 }
 
 const colors = ['#F87171', '#FBBF24', '#34D399', '#60A5FA', '#A78BFA', '#F472B6'];
 
-export default function EditNoteModal({ isOpen, onClose, onSave, note }: EditNoteModalProps) {
+export default function EditPersonModal({ isOpen, onClose, onSave, person }: EditPersonModalProps) {
   const [text, setText] = useState('');
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (isOpen && note) {
-      setText(note.text);
-      setSelectedColor(note.color);
+    if (isOpen && person) {
+      setText(person.name);
+      setSelectedColor(person.color);
       if (textareaRef.current) {
         textareaRef.current.focus();
       }
     }
-  }, [isOpen, note]);
+  }, [isOpen, person]);
 
-  if (!isOpen || !note) return null;
+  if (!isOpen || !person) return null;
 
   const handleSave = () => {
     if (text) {
-      onSave({ ...note, text: text.trim(), color: selectedColor });
+      onSave({ ...person, name: text.trim(), color: selectedColor });
       onClose();
     }
   };
@@ -50,16 +50,14 @@ export default function EditNoteModal({ isOpen, onClose, onSave, note }: EditNot
     >
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Edit Note</h3>
+          <h3 className="text-lg font-semibold">Edit Person</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800">&times;</button>
         </div>
         <div>
-          <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-2">
-            Edit the note text:
-          </label>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Person&apos;s Name</label>
           <textarea
             ref={textareaRef}
-            id="note"
+            id="personName"
             value={text}
             onChange={(e) => setText(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md"
