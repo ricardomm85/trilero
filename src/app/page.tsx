@@ -34,8 +34,6 @@ export default function Home() {
   const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
   const [noteToEdit, setNoteToEdit] = useState<Note | null>(null);
-  const [isDeleteAllNotesModalOpen, setIsDeleteAllNotesModalOpen] = useState(false);
-  const [isDeleteAllSpecialDaysModalOpen, setIsDeleteAllSpecialDaysModalOpen] = useState(false);
 
   // Load initial data from Local Storage on mount
   useEffect(() => {
@@ -202,17 +200,6 @@ export default function Home() {
     setIsEditNoteModalOpen(false);
   };
 
-  const handleDeleteAllNotes = () => {
-    setNotes([]);
-    setDayNotes([]);
-    setIsDeleteAllNotesModalOpen(false);
-  };
-
-  const handleDeleteAllSpecialDays = () => {
-    setSpecialDays([]);
-    setIsDeleteAllSpecialDaysModalOpen(false);
-  };
-
   return (
     <main className="flex flex-col md:flex-row h-screen bg-white">
       <div className="w-full md:w-1/4 h-full bg-gray-50 md:border-r p-4">
@@ -227,8 +214,6 @@ export default function Home() {
           onOpenNewNoteModal={() => setIsNewNoteModalOpen(true)}
           onDeleteNote={openDeleteConfirmation}
           onEditNote={openEditNoteModal}
-          onDeleteAllNotes={() => setIsDeleteAllNotesModalOpen(true)}
-          onDeleteAllSpecialDays={() => setIsDeleteAllSpecialDaysModalOpen(true)}
           events={events}
         />
       </div>
@@ -270,20 +255,6 @@ export default function Home() {
         onClose={() => setIsEditNoteModalOpen(false)}
         onSave={handleEditNote}
         note={noteToEdit}
-      />
-      <ConfirmationModal
-        isOpen={isDeleteAllNotesModalOpen}
-        onClose={() => setIsDeleteAllNotesModalOpen(false)}
-        onConfirm={handleDeleteAllNotes}
-        title="Delete All Notes"
-        message="Are you sure you want to delete all notes? This action cannot be undone."
-      />
-      <ConfirmationModal
-        isOpen={isDeleteAllSpecialDaysModalOpen}
-        onClose={() => setIsDeleteAllSpecialDaysModalOpen(false)}
-        onConfirm={handleDeleteAllSpecialDays}
-        title="Delete All Special Days"
-        message="Are you sure you want to delete all special days? This action cannot be undone."
       />
     </main>
   );

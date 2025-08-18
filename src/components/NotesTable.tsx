@@ -97,7 +97,6 @@ export default function NotesTable({ events }: NotesTableProps) {
         <tfoot className="text-xs text-black uppercase bg-gray-100">
             <tr>
                 <th scope="row" className="px-1 py-1">Total</th>
-                <td className="px-1 py-1"></td>
                 <td className="px-1 py-1">{totals.diario > 0 ? totals.diario : ''}</td>
                 <td className="px-1 py-1">{totals.vi > 0 ? totals.vi : ''}</td>
                 <td className="px-1 py-1">{totals.sa > 0 ? totals.sa : ''}</td>

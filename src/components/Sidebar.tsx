@@ -1,3 +1,4 @@
+
 'use client';
 
 import { DateRange, DayPicker } from 'react-day-picker';
@@ -17,12 +18,10 @@ interface SidebarProps {
   onOpenNewNoteModal: () => void;
   onDeleteNote: (note: Note) => void;
   onEditNote: (note: Note) => void;
-  onDeleteAllNotes: () => void;
-  onDeleteAllSpecialDays: () => void;
   events: EventInput[];
 }
 
-export default function Sidebar({ selectedRange, onRangeChange, notes, specialDays, onAddSpecialDay, onRemoveSpecialDay, onOpenSpecialDayModal, onOpenNewNoteModal, onDeleteNote, onEditNote, onDeleteAllNotes, onDeleteAllSpecialDays, events }: SidebarProps) {
+export default function Sidebar({ selectedRange, onRangeChange, notes, specialDays, onAddSpecialDay, onRemoveSpecialDay, onOpenSpecialDayModal, onOpenNewNoteModal, onDeleteNote, onEditNote, events }: SidebarProps) {
   const handleAddSpecialDay = () => {
     onOpenSpecialDayModal();
   };
@@ -48,16 +47,6 @@ export default function Sidebar({ selectedRange, onRangeChange, notes, specialDa
         >
           New Note
         </button>
-        {
-          notes.length > 0 && (
-            <button
-              onClick={onDeleteAllNotes}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4 w-full"
-            >
-              Delete All Notes
-            </button>
-          )
-        }
         {
           notes.length === 0 ? (
             <p className="text-gray-500">No notes created yet.</p>
@@ -95,16 +84,6 @@ export default function Sidebar({ selectedRange, onRangeChange, notes, specialDa
         >
           Add Special Day
         </button>
-        {
-          specialDays.length > 0 && (
-            <button
-              onClick={onDeleteAllSpecialDays}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4 w-full"
-            >
-              Delete All Special Days
-            </button>
-          )
-        }
         {
           specialDays.length === 0 ? (
             <p className="text-gray-500">No special days added yet.</p>
