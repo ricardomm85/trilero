@@ -2,20 +2,27 @@
 
 import { DateRange, DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
-import { EventInput } from '@fullcalendar/core';
+import { Note } from '@/types';
 import NotesTable from './NotesTable';
+import { EventInput } from '@fullcalendar/core';
 
 interface SidebarProps {
   selectedRange: DateRange | undefined;
   onRangeChange: (range: DateRange | undefined) => void;
-  events: EventInput[];
+  notes: Note[];
   specialDays: string[];
   onAddSpecialDay: (date: string) => void;
   onRemoveSpecialDay: (date: string) => void;
   onOpenSpecialDayModal: () => void;
+  onOpenNewNoteModal: () => void;
+  onDeleteNote: (note: Note) => void;
+  onEditNote: (note: Note) => void;
+  onDeleteAllNotes: () => void;
+  onDeleteAllSpecialDays: () => void;
+  events: EventInput[];
 }
 
-export default function Sidebar({ selectedRange, onRangeChange, events, specialDays, onAddSpecialDay, onRemoveSpecialDay, onOpenSpecialDayModal }: SidebarProps) {
+export default function Sidebar({ selectedRange, onRangeChange, notes, specialDays, onAddSpecialDay, onRemoveSpecialDay, onOpenSpecialDayModal, onOpenNewNoteModal, onDeleteNote, onEditNote, onDeleteAllNotes, onDeleteAllSpecialDays, events }: SidebarProps) {
   const handleAddSpecialDay = () => {
     onOpenSpecialDayModal();
   };
@@ -30,7 +37,55 @@ export default function Sidebar({ selectedRange, onRangeChange, events, specialD
         numberOfMonths={1}
         weekStartsOn={1} // Start week on Monday
       />
+
       <NotesTable events={events} />
+
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold mb-2">Notes</h2>
+        <button
+          onClick={onOpenNewNoteModal}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4 w-full"
+        >
+          New Note
+        </button>
+        {
+          notes.length > 0 && (
+            <button
+              onClick={onDeleteAllNotes}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4 w-full"
+            >
+              Delete All Notes
+            </button>
+          )
+        }
+        {
+          notes.length === 0 ? (
+            <p className="text-gray-500">No notes created yet.</p>
+          ) : (
+            <ul className="space-y-2">
+              {notes.map((note) => (
+                <li key={note.id} className="flex justify-between items-center p-2 rounded-md" style={{ backgroundColor: note.color, color: 'white' }}>
+                  <span>{note.text}</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => onEditNote(note)}
+                      className="ml-2 text-white hover:text-blue-500 text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => onDeleteNote(note)}
+                      className="ml-2 text-white hover:text-red-500 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
 
       <div className="mt-8">
         <h2 className="text-lg font-semibold mb-2">Special Days</h2>
@@ -40,6 +95,16 @@ export default function Sidebar({ selectedRange, onRangeChange, events, specialD
         >
           Add Special Day
         </button>
+        {
+          specialDays.length > 0 && (
+            <button
+              onClick={onDeleteAllSpecialDays}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-4 w-full"
+            >
+              Delete All Special Days
+            </button>
+          )
+        }
         {
           specialDays.length === 0 ? (
             <p className="text-gray-500">No special days added yet.</p>

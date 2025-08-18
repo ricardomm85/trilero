@@ -1,3 +1,4 @@
+
 'use client';
 
 import { EventInput } from '@fullcalendar/core';
@@ -9,6 +10,7 @@ interface NotesTableProps {
 
 interface NoteRow {
   title: string;
+  color: string;
   diario: number;
   vi: number;
   sa: number;
@@ -27,6 +29,7 @@ export default function NotesTable({ events }: NotesTableProps) {
         if (!noteMap.has(event.title)) {
           noteMap.set(event.title, {
             title: event.title,
+            color: event.backgroundColor || '#3788d8',
             diario: 0,
             vi: 0,
             sa: 0,
@@ -67,7 +70,7 @@ export default function NotesTable({ events }: NotesTableProps) {
     <div className="mt-8">
       <h2 className="text-lg font-semibold mb-4">Notes Summary</h2>
       <table className="w-full text-sm text-left text-gray-500">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+        <thead className="text-xs text-black uppercase bg-gray-100">
           <tr>
             <th scope="col" className="px-1 py-1">Nota</th>
             <th scope="col" className="px-1 py-1">Diario</th>
@@ -80,9 +83,9 @@ export default function NotesTable({ events }: NotesTableProps) {
         <tbody>
           {noteRows.map(note => (
             <tr key={note.title} className="bg-white border-b">
-              <th scope="row" className="px-1 py-1 font-medium text-gray-900 whitespace-nowrap">
+              <td className="px-1 py-1 font-medium text-white whitespace-nowrap" style={{ backgroundColor: note.color }}>
                 {note.title}
-              </th>
+              </td>
               <td className="px-1 py-1">{note.diario > 0 ? note.diario : ''}</td>
               <td className="px-1 py-1">{note.vi > 0 ? note.vi : ''}</td>
               <td className="px-1 py-1">{note.sa > 0 ? note.sa : ''}</td>
@@ -91,9 +94,10 @@ export default function NotesTable({ events }: NotesTableProps) {
             </tr>
           ))}
         </tbody>
-        <tfoot className="text-xs text-gray-700 uppercase bg-gray-100">
+        <tfoot className="text-xs text-black uppercase bg-gray-100">
             <tr>
                 <th scope="row" className="px-1 py-1">Total</th>
+                <td className="px-1 py-1"></td>
                 <td className="px-1 py-1">{totals.diario > 0 ? totals.diario : ''}</td>
                 <td className="px-1 py-1">{totals.vi > 0 ? totals.vi : ''}</td>
                 <td className="px-1 py-1">{totals.sa > 0 ? totals.sa : ''}</td>

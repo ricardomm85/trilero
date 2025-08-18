@@ -54,25 +54,46 @@ export default function CalendarView({ selectedRange, events, onDateClick, onEve
         events={events}
         dateClick={onDateClick}
         eventClick={onEventClick}
-        editable={true}
+        editable={false}
         dayCellDidMount={(arg: DayCellMountArg) => {
-          const dayOfWeek = arg.date.getDay();
-          if (dayOfWeek === 0 || dayOfWeek === 6) { // 0 for Sunday, 6 for Saturday
-            const dayNumberEl = arg.el.querySelector('.fc-daygrid-day-number');
-            if (dayNumberEl) {
-              (dayNumberEl as HTMLElement).style.fontWeight = 'bold';
-              (dayNumberEl as HTMLElement).style.color = '#FF0000';
-            }
-          }
-          const month = arg.date.getMonth();
-          if ((month + 1) % 2 !== 0) {
-            arg.el.classList.add('day-in-odd-month');
-          }
+          const dayNumberEl = arg.el.querySelector('.fc-daygrid-day-number');
 
-          // Highlight special days
-          const dateStr = format(arg.date, 'yyyy-MM-dd');
-          if (specialDays.includes(dateStr)) {
-            arg.el.style.backgroundColor = '#FFFACD'; // Pale yellow
+          if (arg.isToday) {
+            arg.el.style.backgroundColor = '#ADD8E6'; // Light blue
+            if (dayNumberEl) {
+              (dayNumberEl as HTMLElement).style.color = '#000000';
+              (dayNumberEl as HTMLElement).style.fontWeight = 'bold';
+            }
+          } else {
+            const dayOfWeek = arg.date.getDay();
+            if (dayOfWeek === 0 || dayOfWeek === 6) { // 0 for Sunday, 6 for Saturday
+              arg.el.style.backgroundColor = '#D3D3D3'; // Light gray
+              if (dayNumberEl) {
+                (dayNumberEl as HTMLElement).style.fontWeight = 'bold';
+                (dayNumberEl as HTMLElement).style.color = '#000000';
+              }
+            }
+            const month = arg.date.getMonth();
+            if ((month + 1) % 2 !== 0) {
+              arg.el.classList.add('day-in-odd-month');
+            }
+
+            // Highlight special days
+            const dateStr = format(arg.date, 'yyyy-MM-dd');
+            if (specialDays.includes(dateStr)) {
+              if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                arg.el.style.backgroundColor = '#FFD700'; // Gold
+                if (dayNumberEl) {
+                  (dayNumberEl as HTMLElement).style.color = '#000000';
+                  (dayNumberEl as HTMLElement).style.fontWeight = 'bold';
+                }
+              } else {
+                if (dayNumberEl) {
+                  (dayNumberEl as HTMLElement).style.color = '#000000';
+                  (dayNumberEl as HTMLElement).style.fontWeight = 'bold';
+                }
+              }
+            }
           }
         }}
       />

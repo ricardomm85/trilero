@@ -1,27 +1,41 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { DateRange } from 'react-day-picker';
 import Sidebar from '@/components/Sidebar';
 import CalendarView from '@/components/CalendarView';
-import NoteModal from '@/components/NoteModal';
-import { EventInput, EventClickArg } from '@fullcalendar/core';
+import { EventInput } from '@fullcalendar/core';
 import { DateClickArg } from '@fullcalendar/interaction';
 import { format } from 'date-fns';
 import SpecialDayModal from '@/components/SpecialDayModal';
+import NewNoteModal from '@/components/NewNoteModal';
+import SelectNoteModal from '@/components/SelectNoteModal';
+import ConfirmationModal from '@/components/ConfirmationModal';
+import EditNoteModal from '@/components/EditNoteModal';
+import { Note, DayNote } from '@/types';
 
 const RANGE_STORAGE_KEY = 'calendarDateRange';
-const EVENTS_STORAGE_KEY = 'calendarEvents';
+const NOTES_STORAGE_KEY = 'calendarNotes';
+const DAY_NOTES_STORAGE_KEY = 'calendarDayNotes';
 
 export default function Home() {
   const [range, setRange] = useState<DateRange | undefined>();
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [dayNotes, setDayNotes] = useState<DayNote[]>([]);
   const [events, setEvents] = useState<EventInput[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [editingEvent, setEditingEvent] = useState<EventInput | null>(null);
   const [specialDays, setSpecialDays] = useState<string[]>([]);
   const [isSpecialDayModalOpen, setIsSpecialDayModalOpen] = useState(false);
+  const [isNewNoteModalOpen, setIsNewNoteModalOpen] = useState(false);
+  const [isSelectNoteModalOpen, setIsSelectNoteModalOpen] = useState(false);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
+  const [noteToEdit, setNoteToEdit] = useState<Note | null>(null);
+  const [isDeleteAllNotesModalOpen, setIsDeleteAllNotesModalOpen] = useState(false);
+  const [isDeleteAllSpecialDaysModalOpen, setIsDeleteAllSpecialDaysModalOpen] = useState(false);
 
   // Load initial data from Local Storage on mount
   useEffect(() => {
@@ -37,10 +51,16 @@ export default function Home() {
       }
     }
 
-    // Load Events
-    const savedEventsJSON = localStorage.getItem(EVENTS_STORAGE_KEY);
-    if (savedEventsJSON) {
-      setEvents(JSON.parse(savedEventsJSON));
+    // Load Notes
+    const savedNotesJSON = localStorage.getItem(NOTES_STORAGE_KEY);
+    if (savedNotesJSON) {
+      setNotes(JSON.parse(savedNotesJSON));
+    }
+
+    // Load DayNotes
+    const savedDayNotesJSON = localStorage.getItem(DAY_NOTES_STORAGE_KEY);
+    if (savedDayNotesJSON) {
+      setDayNotes(JSON.parse(savedDayNotesJSON));
     }
 
     // Load Special Days
@@ -60,11 +80,17 @@ export default function Home() {
     }
   }, [range, isInitialLoad]);
 
-  // Save events to Local Storage whenever they change
+  // Save notes to Local Storage whenever they change
   useEffect(() => {
-    if (isInitialLoad) return; // Don't save during initial load
-    localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
-  }, [events, isInitialLoad]);
+    if (isInitialLoad) return;
+    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+  }, [notes, isInitialLoad]);
+
+  // Save dayNotes to Local Storage whenever they change
+  useEffect(() => {
+    if (isInitialLoad) return;
+    localStorage.setItem(DAY_NOTES_STORAGE_KEY, JSON.stringify(dayNotes));
+  }, [dayNotes, isInitialLoad]);
 
   // Save special days to Local Storage whenever they change
   useEffect(() => {
@@ -72,14 +98,31 @@ export default function Home() {
     localStorage.setItem('specialDays', JSON.stringify(specialDays));
   }, [specialDays, isInitialLoad]);
 
+  // Generate events from dayNotes and notes
+  useEffect(() => {
+    const newEvents = dayNotes.map(dayNote => {
+      const note = notes.find(n => n.id === dayNote.noteId);
+      if (!note) return null;
+      return {
+        id: `${dayNote.date}-${dayNote.noteId}`,
+        title: note.text,
+        date: dayNote.date,
+        backgroundColor: note.color,
+        borderColor: note.color,
+        textColor: 'white',
+      };
+    }).filter(Boolean) as EventInput[];
+    setEvents(newEvents);
+  }, [dayNotes, notes]);
+
   const addSpecialDay = (date: string) => {
     if (!specialDays.includes(date)) {
-      setSpecialDays((prevDays) => [...prevDays, date].sort());
+      setSpecialDays(prevDays => [...prevDays, date].sort());
     }
   };
 
   const removeSpecialDay = (date: string) => {
-    setSpecialDays((prevDays) => prevDays.filter((day) => day !== date));
+    setSpecialDays(prevDays => prevDays.filter(day => day !== date));
   };
 
   const handleOpenSpecialDayModal = () => {
@@ -97,95 +140,150 @@ export default function Home() {
 
   const handleDateClick = (arg: DateClickArg) => {
     setSelectedDate(arg.date);
-    setEditingEvent(null);
-    setIsModalOpen(true);
+    setIsSelectNoteModalOpen(true);
   };
 
-  const handleEventClick = (clickInfo: EventClickArg) => {
-    setEditingEvent({
-      id: clickInfo.event.id,
-      title: clickInfo.event.title,
-      start: clickInfo.event.start || undefined,
-      end: clickInfo.event.end || undefined,
-      allDay: clickInfo.event.allDay,
-      backgroundColor: clickInfo.event.backgroundColor,
-      borderColor: clickInfo.event.borderColor,
-      textColor: clickInfo.event.textColor,
-    });
-    setSelectedDate(clickInfo.event.start);
-    setIsModalOpen(true);
+  const handleSaveNewNote = (note: Omit<Note, 'id'>) => {
+    const newNote = { ...note, id: String(Date.now()) };
+    setNotes([...notes, newNote]);
+    setIsNewNoteModalOpen(false);
   };
 
-  const handleSaveNote = (note: string, color: string) => {
-    if (editingEvent) {
-      // Update existing event
-      setEvents(
-        events.map(event =>
-          event.id === editingEvent.id
-            ? { ...event, title: note, backgroundColor: color, borderColor: color }
-            : event
-        )
-      );
-    } else if (selectedDate) {
-      // Create new event
+  const handleSelectNote = (noteId: string) => {
+    if (selectedDate) {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      setEvents([
-        ...events,
-        {
-          id: String(Date.now()),
-          title: note,
-          date: dateStr,
-          backgroundColor: color,
-          borderColor: color,
-        },
-      ]);
+      const existingDayNoteIndex = dayNotes.findIndex(dn => dn.date === dateStr);
+
+      if (existingDayNoteIndex > -1) {
+        // Update existing day note
+        const updatedDayNotes = [...dayNotes];
+        updatedDayNotes[existingDayNoteIndex] = { ...updatedDayNotes[existingDayNoteIndex], noteId };
+        setDayNotes(updatedDayNotes);
+      } else {
+        // Create new day note
+        setDayNotes([...dayNotes, { date: dateStr, noteId }]);
+      }
     }
-    setIsModalOpen(false);
+    setIsSelectNoteModalOpen(false);
     setSelectedDate(null);
-    setEditingEvent(null);
+  };
+
+  const handleDeleteDayNote = () => {
+    if (selectedDate) {
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      setDayNotes(dayNotes.filter(dn => dn.date !== dateStr));
+    }
+    setIsSelectNoteModalOpen(false);
+    setSelectedDate(null);
+  };
+
+  const openDeleteConfirmation = (note: Note) => {
+    setNoteToDelete(note);
+    setIsConfirmationModalOpen(true);
   };
 
   const handleDeleteNote = () => {
-    if (editingEvent) {
-      setEvents(events.filter(event => event.id !== editingEvent.id));
-      setIsModalOpen(false);
-      setSelectedDate(null);
-      setEditingEvent(null);
+    if (noteToDelete) {
+      setNotes(notes.filter(n => n.id !== noteToDelete.id));
+      setDayNotes(dayNotes.filter(dn => dn.noteId !== noteToDelete.id));
+      setNoteToDelete(null);
     }
+    setIsConfirmationModalOpen(false);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedDate(null);
-    setEditingEvent(null);
-  }
+  const openEditNoteModal = (note: Note) => {
+    setNoteToEdit(note);
+    setIsEditNoteModalOpen(true);
+  };
+
+  const handleEditNote = (editedNote: Note) => {
+    setNotes(notes.map(n => n.id === editedNote.id ? editedNote : n));
+    setNoteToEdit(null);
+    setIsEditNoteModalOpen(false);
+  };
+
+  const handleDeleteAllNotes = () => {
+    setNotes([]);
+    setDayNotes([]);
+    setIsDeleteAllNotesModalOpen(false);
+  };
+
+  const handleDeleteAllSpecialDays = () => {
+    setSpecialDays([]);
+    setIsDeleteAllSpecialDaysModalOpen(false);
+  };
 
   return (
     <main className="flex flex-col md:flex-row h-screen bg-white">
       <div className="w-full md:w-1/4 h-full bg-gray-50 md:border-r p-4">
-        <Sidebar selectedRange={range} onRangeChange={setRange} events={events} specialDays={specialDays} onAddSpecialDay={addSpecialDay} onRemoveSpecialDay={removeSpecialDay} onOpenSpecialDayModal={handleOpenSpecialDayModal} />
+        <Sidebar
+          selectedRange={range}
+          onRangeChange={setRange}
+          notes={notes}
+          specialDays={specialDays}
+          onAddSpecialDay={addSpecialDay}
+          onRemoveSpecialDay={removeSpecialDay}
+          onOpenSpecialDayModal={handleOpenSpecialDayModal}
+          onOpenNewNoteModal={() => setIsNewNoteModalOpen(true)}
+          onDeleteNote={openDeleteConfirmation}
+          onEditNote={openEditNoteModal}
+          onDeleteAllNotes={() => setIsDeleteAllNotesModalOpen(true)}
+          onDeleteAllSpecialDays={() => setIsDeleteAllSpecialDaysModalOpen(true)}
+          events={events}
+        />
       </div>
       <div className="w-full md:w-3/4 h-full p-4">
         <CalendarView
           selectedRange={range}
           events={events}
           onDateClick={handleDateClick}
-          onEventClick={handleEventClick}
+          onEventClick={() => {}}
           specialDays={specialDays}
         />
       </div>
-      <NoteModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSave={handleSaveNote}
-        onDelete={handleDeleteNote}
-        selectedDate={selectedDate}
-        event={editingEvent}
+      <NewNoteModal
+        isOpen={isNewNoteModalOpen}
+        onClose={() => setIsNewNoteModalOpen(false)}
+        onSave={handleSaveNewNote}
+      />
+      <SelectNoteModal
+        isOpen={isSelectNoteModalOpen}
+        onClose={() => setIsSelectNoteModalOpen(false)}
+        onSelect={handleSelectNote}
+        onDelete={handleDeleteDayNote}
+        notes={notes}
       />
       <SpecialDayModal
         isOpen={isSpecialDayModalOpen}
         onClose={handleCloseSpecialDayModal}
         onSave={handleSaveSpecialDay}
+      />
+      <ConfirmationModal
+        isOpen={isConfirmationModalOpen}
+        onClose={() => setIsConfirmationModalOpen(false)}
+        onConfirm={handleDeleteNote}
+        title="Delete Note"
+        message={`Are you sure you want to delete the note: "${noteToDelete?.text}"? This will remove the note from all assigned days.`}
+      />
+      <EditNoteModal
+        isOpen={isEditNoteModalOpen}
+        onClose={() => setIsEditNoteModalOpen(false)}
+        onSave={handleEditNote}
+        note={noteToEdit}
+      />
+      <ConfirmationModal
+        isOpen={isDeleteAllNotesModalOpen}
+        onClose={() => setIsDeleteAllNotesModalOpen(false)}
+        onConfirm={handleDeleteAllNotes}
+        title="Delete All Notes"
+        message="Are you sure you want to delete all notes? This action cannot be undone."
+      />
+      <ConfirmationModal
+        isOpen={isDeleteAllSpecialDaysModalOpen}
+        onClose={() => setIsDeleteAllSpecialDaysModalOpen(false)}
+        onConfirm={handleDeleteAllSpecialDays}
+        title="Delete All Special Days"
+        message="Are you sure you want to delete all special days? This action cannot be undone."
       />
     </main>
   );
