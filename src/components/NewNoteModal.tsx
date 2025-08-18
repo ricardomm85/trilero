@@ -29,11 +29,16 @@ export default function NewNoteModal({ isOpen, onClose, onSave }: NewNoteModalPr
 
   if (!isOpen) return null;
 
-  const handleSave = () => {
-    if (text) {
-      onSave({ text: text.trim(), color: selectedColor });
-      setText('');
-      onClose();
+  const handleSaveNote = () => {
+    if (text.trim()) {
+      const parts = text.split(/[\n]/).map(part => part.trim()).filter(part => part.length > 0);
+      if (parts.length > 0) {
+        parts.forEach(part => {
+          onSave({text: part, color: selectedColor});
+        });
+        setText('');
+        onClose();
+      }
     }
   };
 
@@ -85,7 +90,7 @@ export default function NewNoteModal({ isOpen, onClose, onSave }: NewNoteModalPr
           <button onClick={onClose} className="px-4 py-2 rounded-md text-gray-600 bg-gray-100 hover:bg-gray-200">
             Cancel
           </button>
-          <button onClick={handleSave} className="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700">
+          <button onClick={handleSaveNote} className="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700">
             Save
           </button>
         </div>

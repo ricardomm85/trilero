@@ -14,6 +14,7 @@ import SelectNoteModal from '@/components/SelectNoteModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import EditNoteModal from '@/components/EditNoteModal';
 import { Note, DayNote } from '@/types';
+import { nanoid } from 'nanoid';
 
 const RANGE_STORAGE_KEY = 'calendarDateRange';
 const NOTES_STORAGE_KEY = 'calendarNotes';
@@ -142,8 +143,8 @@ export default function Home() {
   };
 
   const handleSaveNewNote = (note: Omit<Note, 'id'>) => {
-    const newNote = { ...note, id: String(Date.now()) };
-    setNotes([...notes, newNote]);
+    const newNote = { ...note, id: nanoid() };
+    setNotes(prevNotes => [...prevNotes, newNote]);
     setIsNewNoteModalOpen(false);
   };
 
