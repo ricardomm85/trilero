@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { DateRange } from 'react-day-picker';
@@ -18,10 +19,14 @@ interface PdfExportButtonProps {
 }
 
 const PdfExportButton = ({ selectedRange, events, specialDays }: PdfExportButtonProps) => {
+  const [isExporting, setIsExporting] = useState(false);
+
   const handleExport = async () => {
     if (!selectedRange?.from || !selectedRange?.to) {
       return;
     }
+
+    setIsExporting(true);
 
     const pdf = new jsPDF('l', 'mm', 'a4');
     const monthCount = differenceInCalendarMonths(selectedRange.to, selectedRange.from) + 1;
@@ -45,6 +50,11 @@ const PdfExportButton = ({ selectedRange, events, specialDays }: PdfExportButton
             events={events}
             height="auto"
             firstDay={1}
+            headerToolbar={{
+              left: 'title',
+              center: '',
+              right: ''
+            }}
             dayCellDidMount={(arg) => {
               const dayOfWeek = arg.date.getDay();
               if (dayOfWeek === 0 || dayOfWeek === 6) {
@@ -86,14 +96,16 @@ const PdfExportButton = ({ selectedRange, events, specialDays }: PdfExportButton
     root.unmount();
     document.body.removeChild(tempContainer);
     pdf.save('calendar.pdf');
+    setIsExporting(false);
   };
 
   return (
     <button
       onClick={handleExport}
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${isExporting ? 'opacity-50 cursor-not-allowed' : ''}`}
+      disabled={isExporting}
     >
-      Export to PDF
+      {isExporting ? 'Exporting...' : 'Export to PDF'}
     </button>
   );
 };
