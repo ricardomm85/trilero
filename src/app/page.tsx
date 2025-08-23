@@ -209,7 +209,6 @@ export default function Home() {
           onRangeChange={setRange}
           persons={persons}
           specialDays={specialDays}
-          onAddSpecialDay={addSpecialDay}
           onRemoveSpecialDay={removeSpecialDay}
           onOpenSpecialDayModal={handleOpenSpecialDayModal}
           onOpenNewPersonModal={() => setIsNewPersonModalOpen(true)}

@@ -35,3 +35,4 @@ This project is a web application for calendar management. The initial phase foc
 - **Commit Messages**: After completing a set of modifications, provide a descriptive commit message in English that summarizes the changes.
 - **Development Server**: Do not run `npm run dev` or any other development server. The user will handle running the application.
 - **Commits**: Do not commit changes. The user will handle all commits.
+- **No Verify**: Do not use `git commit --no-verify`.

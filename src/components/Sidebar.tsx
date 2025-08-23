@@ -12,7 +12,6 @@ interface SidebarProps {
   onRangeChange: (range: DateRange | undefined) => void;
   persons: Person[];
   specialDays: string[];
-  onAddSpecialDay: (date: string) => void;
   onRemoveSpecialDay: (date: string) => void;
   onOpenSpecialDayModal: () => void;
   onOpenNewPersonModal: () => void;
