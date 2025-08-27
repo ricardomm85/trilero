@@ -2,32 +2,44 @@
 
 ## Overview
 
-This project is a web application for calendar management. The initial phase focuses on allowing users to select a date range and view a large calendar where they can add, view, and delete daily notes. All data is persisted in the browser's Local Storage.
+Trilero is a high-performance and aesthetically pleasing web application designed for organizing work shifts. It is built with a modern tech stack, emphasizing speed and a clean user interface. The project will be developed iteratively, with a focus on minimizing external dependencies unless strictly necessary.
 
 ## Technology Stack
 
-- **Framework**: Next.js (with App Router)
-- **Language**: TypeScript
+- **Framework**: Next.js
 - **Styling**: Tailwind CSS
-- **Main Calendar**: FullCalendar (`@fullcalendar/react`) for the main interactive calendar view.
-- **Date Picker**: react-day-picker for selecting start and end dates in the sidebar.
-- **Backend & Database**: Supabase (for future implementation).
-- **Deployment**: Vercel (for future implementation).
+- **Database & Authentication**: Supabase (PostgreSQL)
 
-## Phase 1: Core Functionality
+## Core Functionality
 
-- **Two-Column Layout**:
-  - A narrow sidebar on the left for user inputs.
-  - A wider main content area on the right for the calendar display.
-- **Date Range Selection**:
-  - The sidebar contains a `react-day-picker` input for selecting a start and end date.
-- **Interactive Calendar**:
-  - The main content area features a large, scrollable `FullCalendar` instance.
-  - Users can click on a day to add a simple text note.
-  - Users can click on an existing note to delete it.
-- **Data Persistence**:
-  - The selected date range is automatically saved to the browser's Local Storage and reloaded on the next visit.
-  - All calendar notes are also saved to Local Storage, persisting them between sessions.
+### 1. Landing Page
+- A static, public-facing page detailing the application's features.
+- Includes a login button (non-functional for now).
+- The content of the web will be in Spanish, but the code in English.
+- It will explain what the tool does and the steps to create a new planner.
+
+### 2. Authentication
+- Users will log in via Google OAuth, powered by Supabase Auth.
+
+### 3. Dashboard
+- After logging in, users are presented with a dashboard displaying their existing shift planners in a card-based layout.
+- If a user has no planners, a prominent call-to-action button will prompt them to create their first one.
+
+### 4. New Planner Wizard
+A three-step process for creating a new shift planner:
+1.  **Date Selection**: Users select a start and end date for the planner using a component like `react-datepicker`.
+2.  **Staff Management**: Users must add at least one staff member by name.
+3.  **Holiday Selection**: Within the selected date range, users can mark any number of days as holidays.
+
+### 5. Planner Interface
+- Once the wizard is complete, the user is taken to the main planner view.
+- **Layout**: A two-column design featuring a sidebar on the left and a calendar on the right.
+- **Sidebar**:
+    - Displays the information gathered during the wizard (start/end dates, staff members, holidays).
+    - Contains a "Save" button to persist data to Supabase.
+    - Includes a "Back to Dashboard" button to return to the list of planners.
+- **Calendar View**:
+    - The main area where the shift schedule will be displayed and managed.
 
 ## Development Rules
 
