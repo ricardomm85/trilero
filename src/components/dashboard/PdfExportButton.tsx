@@ -1,21 +1,14 @@
 'use client';
 
-import { FC } from 'react';
-import { DateRange } from 'react-day-picker';
-import { EventInput } from '@fullcalendar/core';
+
+
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 // NOTE: You need to install jspdf and html2canvas
 // npm install jspdf html2canvas
 
-interface PdfExportButtonProps {
-  selectedRange: DateRange | undefined;
-  events: EventInput[];
-  specialDays: string[];
-}
-
-const PdfExportButton: FC<PdfExportButtonProps> = ({ selectedRange, events, specialDays }) => {
+const PdfExportButton = () => {
   const handleExport = () => {
     const input = document.getElementById('calendar-to-print');
     if (input) {

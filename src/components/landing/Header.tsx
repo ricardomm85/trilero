@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { supabase } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
@@ -37,13 +38,19 @@ export function Header() {
         <Link href="/" className="text-xl font-bold text-gray-800">Trilero</Link>
         {user ? (
           <div className="flex items-center gap-4">
-            <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-10 h-10 rounded-full" />
+            <Link
+              href="/shift-planner/list"
+              className="rounded-full bg-gradient-to-r from-green-500 to-teal-500 px-6 py-3 text-white shadow-lg transition-transform hover:scale-105"
+            >
+              Mis planillas
+            </Link>
             <button
               onClick={handleLogout}
               className="rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-6 py-3 text-white shadow-lg transition-transform hover:scale-105"
             >
               Logout
             </button>
+            <Image src={user.user_metadata.avatar_url} alt="User avatar" width={40} height={40} className="rounded-full" />
           </div>
         ) : (
           <button
