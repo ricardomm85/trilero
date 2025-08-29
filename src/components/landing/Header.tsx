@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link';
 import { supabase } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
@@ -33,9 +34,7 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 z-10 w-full bg-white/80 backdrop-blur-2xl">
       <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-4">
-        <p className="text-2xl font-bold text-zinc-900">
-          Trilero
-        </p>
+        <Link href="/" className="text-xl font-bold text-gray-800">Trilero</Link>
         {user ? (
           <div className="flex items-center gap-4">
             <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-10 h-10 rounded-full" />
