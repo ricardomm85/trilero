@@ -31,11 +31,7 @@ export default function CalendarView({ selectedRange, events, onDateClick, onEve
   return (
     <div className="h-full overflow-y-auto">
       <div className="flex justify-end p-4">
-        <PdfExportButton
-          selectedRange={selectedRange}
-          events={events}
-          specialDays={specialDays}
-        />
+        <PdfExportButton />
       </div>
       <div id="calendar-to-print">
         <FullCalendar
