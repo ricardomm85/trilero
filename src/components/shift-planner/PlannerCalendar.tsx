@@ -5,6 +5,8 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { ShiftPlanner } from '@/types';
 import { EventInput } from '@fullcalendar/core';
+import esLocale from '@fullcalendar/core/locales/es';
+import { differenceInCalendarMonths } from 'date-fns';
 
 interface PlannerCalendarProps {
   planner: ShiftPlanner;
@@ -39,18 +41,28 @@ export default function PlannerCalendar({ planner, onDateClick }: PlannerCalenda
     });
   });
 
+  const monthCount = differenceInCalendarMonths(new Date(endDate), new Date(startDate)) + 1;
+
   return (
-    <div className="h-full w-full">
+    <div className="w-full">
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,dayGridWeek'
+          left: 'title',
+          center: '',
+          right: ''
         }}
-        initialView="dayGridMonth"
-        height="100%"
+        views={{
+          multiMonth: {
+            type: 'dayGrid',
+            duration: { months: monthCount > 0 ? monthCount : 1 },
+          }
+        }}
+        initialView={'multiMonth'}
+        height={"auto"}
+        locale={esLocale}
         firstDay={1} // Monday
+        initialDate={startDate}
         validRange={{
           start: startDate,
           end: new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1)).toISOString().split('T')[0] // Inclusive end date

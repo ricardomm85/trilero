@@ -80,8 +80,8 @@ export default function PlannerDetailPage() {
   }
 
   return (
-    <div className="flex h-screen">
-      <aside className="w-1/4 bg-gray-50 p-6 overflow-y-auto">
+    <div className="flex">
+      <aside className="w-1/4 bg-gray-50 p-6 h-screen sticky top-0 overflow-y-auto">
         <PlannerSidebar planner={planner} onUpdate={handlePlannerUpdate} />
       </aside>
       <main className="w-3/4 p-8">
