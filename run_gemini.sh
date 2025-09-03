@@ -38,7 +38,7 @@ if [[ ! "$api_choice" =~ ^[0-9]+$ ]] || ((api_choice < 1 || api_choice > ${#name
 fi
 
 SELECTED_API_KEY="${API_KEYS[${names[$((api_choice-1))]}]}"
-export API_KEY="$SELECTED_API_KEY"
+export GEMINI_API_KEY="$SELECTED_API_KEY"
 
 # ---
 # 2. Model Selection

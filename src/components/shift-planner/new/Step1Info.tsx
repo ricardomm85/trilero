@@ -1,6 +1,7 @@
 'use client';
 
 import { DayPicker } from 'react-day-picker';
+import { es } from 'date-fns/locale';
 import 'react-day-picker/dist/style.css';
 import { DateRange } from 'react-day-picker';
 
@@ -37,6 +38,7 @@ export default function Step1Info({ name, onNameChange, dateRange, onDateRangeCh
             mode="range"
             selected={dateRange}
             onSelect={onDateRangeChange}
+            locale={es}
             />
         </div>
       </div>

@@ -10,6 +10,7 @@ import Step1Info from '@/components/shift-planner/new/Step1Info';
 import Step2Staff from '@/components/shift-planner/new/Step2Staff';
 import Step3Holidays from '@/components/shift-planner/new/Step3Holidays';
 import WizardNavigation from '@/components/shift-planner/new/WizardNavigation';
+import { formatDateToYYYYMMDD } from '@/utils/dates';
 
 const SHIFT_PLANNERS_STORAGE_KEY = 'shiftPlanners';
 const TOTAL_STEPS = 3;
@@ -39,12 +40,15 @@ export default function NewShiftPlannerWizard() {
   };
 
   const handleFinish = () => {
+    if (!dateRange?.from || !dateRange?.to) return;
+
     // Finalize data and save to localStorage
     const newPlanner: ShiftPlanner = {
       id: nanoid(6),
       name,
-      startDate: dateRange!.from!.toISOString().split('T')[0],
-      endDate: dateRange!.to!.toISOString().split('T')[0],
+      creationDate: new Date().toISOString(),
+      startDate: formatDateToYYYYMMDD(dateRange.from),
+      endDate: formatDateToYYYYMMDD(dateRange.to),
       staff: staff.map(s => ({ ...s, id: nanoid(6) })), // Assign final nanoids
       holidays,
       assignments: {}, // Start with empty assignments

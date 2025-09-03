@@ -22,6 +22,7 @@ export interface StaffMember {
   id: string; // Unique ID (nanoid)
   name: string;
   color: string; // A color to represent the person in the UI
+  position: number; // For ordering in the UI
 }
 
 export interface Holiday {
@@ -38,6 +39,7 @@ export interface ShiftAssignments {
 export interface ShiftPlanner {
   id: string; // Unique ID for the planner (nanoid)
   name: string;
+  creationDate: string; // ISO 8601 format
   startDate: string; // Format: "YYYY-MM-DD"
   endDate: string; // Format: "YYYY-MM-DD"
   staff: StaffMember[];

@@ -7,6 +7,7 @@ import { ShiftPlanner } from '@/types';
 import { EventInput } from '@fullcalendar/core';
 import esLocale from '@fullcalendar/core/locales/es';
 import { differenceInCalendarMonths } from 'date-fns';
+import { formatDateToYYYYMMDD, parseDateString } from '@/utils/dates';
 
 interface PlannerCalendarProps {
   planner: ShiftPlanner;
@@ -41,7 +42,10 @@ export default function PlannerCalendar({ planner, onDateClick }: PlannerCalenda
     });
   });
 
-  const monthCount = differenceInCalendarMonths(new Date(endDate), new Date(startDate)) + 1;
+  const monthCount = differenceInCalendarMonths(parseDateString(endDate), parseDateString(startDate)) + 1;
+
+  const inclusiveEndDate = parseDateString(endDate);
+  inclusiveEndDate.setDate(inclusiveEndDate.getDate() + 1);
 
   return (
     <div className="w-full">
@@ -65,7 +69,7 @@ export default function PlannerCalendar({ planner, onDateClick }: PlannerCalenda
         initialDate={startDate}
         validRange={{
           start: startDate,
-          end: new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1)).toISOString().split('T')[0] // Inclusive end date
+          end: formatDateToYYYYMMDD(inclusiveEndDate)
         }}
         events={events}
         dateClick={onDateClick}

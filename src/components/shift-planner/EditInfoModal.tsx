@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { ShiftPlanner } from '@/types';
 import { DayPicker, DateRange } from 'react-day-picker';
+import { es } from 'date-fns/locale';
 import 'react-day-picker/dist/style.css';
 import Portal from '@/components/Portal';
+import { formatDateToYYYYMMDD, parseDateString } from '@/utils/dates';
 
 interface EditInfoModalProps {
     isOpen: boolean;
@@ -15,16 +17,17 @@ interface EditInfoModalProps {
 
 export default function EditInfoModal({ isOpen, onClose, planner, onSave }: EditInfoModalProps) {
     const [name, setName] = useState(planner.name);
+
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
-        from: new Date(planner.startDate),
-        to: new Date(planner.endDate),
+        from: parseDateString(planner.startDate),
+        to: parseDateString(planner.endDate),
     });
 
     useEffect(() => {
         setName(planner.name);
         setDateRange({
-            from: new Date(planner.startDate),
-            to: new Date(planner.endDate),
+            from: parseDateString(planner.startDate),
+            to: parseDateString(planner.endDate),
         });
     }, [planner]);
 
@@ -34,8 +37,8 @@ export default function EditInfoModal({ isOpen, onClose, planner, onSave }: Edit
         const updatedPlanner: ShiftPlanner = {
             ...planner,
             name,
-            startDate: dateRange.from.toISOString().split('T')[0],
-            endDate: dateRange.to.toISOString().split('T')[0],
+            startDate: formatDateToYYYYMMDD(dateRange.from),
+            endDate: formatDateToYYYYMMDD(dateRange.to),
         };
         onSave(updatedPlanner);
         onClose();
@@ -71,6 +74,7 @@ export default function EditInfoModal({ isOpen, onClose, planner, onSave }: Edit
                                 mode="range"
                                 selected={dateRange}
                                 onSelect={setDateRange}
+                                locale={es}
                             />
                         </div>
                     </div>

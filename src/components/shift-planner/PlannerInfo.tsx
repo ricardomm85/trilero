@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { ShiftPlanner } from '@/types';
+import { format } from 'date-fns';
+import { parseDateString } from '@/utils/dates';
 import EditInfoModal from './EditInfoModal';
 
 interface PlannerInfoProps {
@@ -25,8 +27,11 @@ export default function PlannerInfo({ planner, onUpdate }: PlannerInfoProps) {
             </div>
             <div className="space-y-2 text-gray-700">
                 <p><span className="font-semibold">Nombre:</span> {planner.name}</p>
-                <p><span className="font-semibold">Desde:</span> {new Date(planner.startDate).toLocaleDateString()}</p>
-                <p><span className="font-semibold">Hasta:</span> {new Date(planner.endDate).toLocaleDateString()}</p>
+                <p><span className="font-semibold">Desde:</span> {format(parseDateString(planner.startDate), 'dd/MM/yyyy')}</p>
+                <p><span className="font-semibold">Hasta:</span> {format(parseDateString(planner.endDate), 'dd/MM/yyyy')}</p>
+                {planner.creationDate && (
+                    <p><span className="font-semibold">Creado:</span> {format(new Date(planner.creationDate), 'dd/MM/yyyy')}</p>
+                )}
             </div>
 
             <EditInfoModal 

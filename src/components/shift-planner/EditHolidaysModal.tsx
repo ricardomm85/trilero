@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { ShiftPlanner, Holiday } from '@/types';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
+import { es } from 'date-fns/locale';
+import { parseDateString, formatDateToYYYYMMDD } from '@/utils/dates';
 import Portal from '@/components/Portal';
 
 interface EditHolidaysModalProps {
@@ -18,14 +20,14 @@ export default function EditHolidaysModal({ isOpen, onClose, planner, onSave }: 
 
     useEffect(() => {
         if (isOpen) {
-            const holidayDates = planner.holidays.map(h => new Date(h.date));
+            const holidayDates = planner.holidays.map(h => parseDateString(h.date));
             setSelectedDays(holidayDates);
         }
     }, [isOpen, planner.holidays]);
 
     const handleSave = () => {
         const updatedHolidays: Holiday[] = selectedDays.map(day => ({
-            date: day.toISOString().split('T')[0],
+            date: formatDateToYYYYMMDD(day),
             name: 'Festivo',
         }));
 
@@ -49,16 +51,17 @@ export default function EditHolidaysModal({ isOpen, onClose, planner, onSave }: 
                     
                     <div className="flex justify-center">
                         <DayPicker
+                            locale={es}
                             mode="multiple"
                             min={1}
                             selected={selectedDays}
                             onSelect={(days) => setSelectedDays(days || [])}
-                            defaultMonth={new Date(planner.startDate)}
-                            startMonth={new Date(planner.startDate)}
-                            endMonth={new Date(planner.endDate)}
+                            defaultMonth={parseDateString(planner.startDate)}
+                            fromMonth={parseDateString(planner.startDate)}
+                            toMonth={parseDateString(planner.endDate)}
                             disabled={[
-                                { before: new Date(planner.startDate) },
-                                { after: new Date(planner.endDate) },
+                                { before: parseDateString(planner.startDate) },
+                                { after: parseDateString(planner.endDate) },
                             ]}
                         />
                     </div>

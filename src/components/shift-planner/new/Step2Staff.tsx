@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { StaffMember } from '@/types';
+import ColorPicker from '../ColorPicker';
+
+const defaultColor = '#3B82F6';
 
 interface Step2StaffProps {
   staff: StaffMember[];
@@ -10,15 +13,21 @@ interface Step2StaffProps {
 
 export default function Step2Staff({ staff, onStaffChange }: Step2StaffProps) {
   const [name, setName] = useState('');
-  const [color, setColor] = useState('#6366F1'); // Default to a nice indigo
+  const [color, setColor] = useState(defaultColor);
 
   const handleAddStaff = () => {
     if (name.trim() === '') return;
-    // Using a temporary ID here. The final nanoid will be generated on wizard completion.
-    const newStaffMember: StaffMember = { id: `temp-${Date.now()}`, name, color };
+    const newStaffMember: StaffMember = { id: `temp-${Date.now()}`, name, color, position: staff.length };
     onStaffChange([...staff, newStaffMember]);
     setName('');
-    setColor('#6366F1');
+    setColor(defaultColor);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleAddStaff();
+    }
   };
 
   const handleRemoveStaff = (id: string) => {
@@ -28,26 +37,28 @@ export default function Step2Staff({ staff, onStaffChange }: Step2StaffProps) {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6 text-gray-700">Añadir Personal</h2>
-      <div className="flex items-center gap-4 mb-6">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Nombre de la persona"
-          className="flex-grow p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-        />
-        <input
-          type="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-          className="h-12 w-12 rounded-lg cursor-pointer"
-        />
-        <button
-          onClick={handleAddStaff}
-          className="rounded-full bg-purple-600 px-6 py-3 text-white font-bold shadow-md transition-transform hover:scale-105"
-        >
-          Añadir
-        </button>
+      
+      <div className="p-4 border rounded-lg bg-gray-50 mb-6">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Nombre de la persona"
+            className="flex-grow w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          />
+          <button
+            onClick={handleAddStaff}
+            className="w-full sm:w-auto rounded-full bg-purple-600 px-6 py-3 text-white font-bold shadow-md transition-transform hover:scale-105"
+          >
+            Añadir
+          </button>
+        </div>
+        
+        <div className="mt-4">
+          <ColorPicker color={color} onChange={setColor} label="Elige un color" />
+        </div>
       </div>
 
       <div className="space-y-3">

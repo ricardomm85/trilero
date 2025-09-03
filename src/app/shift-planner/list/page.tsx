@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShiftPlanner } from '@/types';
+import { format } from 'date-fns';
+import { parseDateString } from '@/utils/dates';
 
 const SHIFT_PLANNERS_STORAGE_KEY = 'shiftPlanners';
 
@@ -66,9 +68,14 @@ export default function ShiftPlannerListPage() {
                 <Link href={`/shift-planner/${planner.id}`} className="block p-6 flex-grow">
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">{planner.name}</h3>
                     <p className="text-gray-600">
-                        {new Date(planner.startDate).toLocaleDateString()} - {new Date(planner.endDate).toLocaleDateString()}
+                        {format(parseDateString(planner.startDate), 'dd/MM/yyyy')} - {format(parseDateString(planner.endDate), 'dd/MM/yyyy')}
                     </p>
                     <p className="text-gray-500 mt-2">{planner.staff.length} personas</p>
+                    {planner.creationDate && (
+                        <p className="text-sm text-gray-400 mt-4">
+                            Creado el: {format(new Date(planner.creationDate), 'dd/MM/yyyy')}
+                        </p>
+                    )}
                 </Link>
                 <div className="bg-gray-50 px-6 py-4 flex justify-between items-center">
                     <Link href={`/shift-planner/${planner.id}`} className="text-purple-600 font-semibold hover:underline">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { StaffMember } from '@/types';
 import Portal from '@/components/Portal';
+import ColorPicker from './ColorPicker';
 
 interface EditStaffModalProps {
     isOpen: boolean;
@@ -56,16 +57,7 @@ export default function EditStaffModal({ isOpen, onClose, staffMember, onSave }:
                     </div>
 
                     <div className="mb-6">
-                        <label htmlFor="staff-color" className="block text-sm font-medium text-gray-700 mb-1">
-                            Color
-                        </label>
-                        <input
-                            type="color"
-                            id="staff-color"
-                            value={color}
-                            onChange={(e) => setColor(e.target.value)}
-                            className="w-full h-10 p-1 border border-gray-300 rounded-md"
-                        />
+                        <ColorPicker color={color} onChange={setColor} />
                     </div>
 
                     <div className="flex justify-end gap-4">

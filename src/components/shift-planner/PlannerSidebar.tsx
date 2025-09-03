@@ -30,15 +30,22 @@ export default function PlannerSidebar({ planner, onUpdate }: PlannerSidebarProp
         const updatedStaff = planner.staff.map(s =>
             s.id === updatedStaffMember.id ? updatedStaffMember : s
         );
-        const updatedPlanner = { ...planner, staff: updatedStaff };
-        onUpdate(updatedPlanner);
+        onUpdate({ ...planner, staff: updatedStaff });
+    };
+
+    const handleUpdateStaffOrder = (updatedStaff: StaffMember[]) => {
+        onUpdate({ ...planner, staff: updatedStaff });
     };
 
     return (
         <div className="space-y-8">
             <PlannerInfo planner={planner} onUpdate={onUpdate} />
             <HolidayManager planner={planner} onUpdate={onUpdate} />
-            <StaffSummaryTable staff={planner.staff} onEditStaff={handleOpenEditStaffModal} />
+            <StaffSummaryTable 
+                staff={planner.staff} 
+                onEditStaff={handleOpenEditStaffModal} 
+                onUpdateStaff={handleUpdateStaffOrder}
+            />
 
             <EditStaffModal
                 isOpen={isEditStaffModalOpen}
