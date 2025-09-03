@@ -53,8 +53,13 @@ export default function EditHolidaysModal({ isOpen, onClose, planner, onSave }: 
                             min={1}
                             selected={selectedDays}
                             onSelect={(days) => setSelectedDays(days || [])}
-                            fromDate={new Date(planner.startDate)}
-                            toDate={new Date(planner.endDate)}
+                            defaultMonth={new Date(planner.startDate)}
+                            startMonth={new Date(planner.startDate)}
+                            endMonth={new Date(planner.endDate)}
+                            disabled={[
+                                { before: new Date(planner.startDate) },
+                                { after: new Date(planner.endDate) },
+                            ]}
                         />
                     </div>
 
