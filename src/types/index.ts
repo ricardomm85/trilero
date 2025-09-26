@@ -1,22 +1,3 @@
-/**
- * @deprecated These interfaces are part of the old data model and will be removed after the refactor.
- * Use ShiftPlanner and its related interfaces instead.
- */
-export interface Person {
-  id: string;
-  name: string;
-  color: string;
-}
-
-/**
- * @deprecated These interfaces are part of the old data model and will be removed after the refactor.
- * Use ShiftPlanner and its related interfaces instead.
- */
-export interface DayPerson {
-  date: string;
-  personId: string;
-}
-
 // New Data Model
 export interface StaffMember {
   id: string; // Unique ID (nanoid)

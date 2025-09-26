@@ -1,41 +1,11 @@
-'use client'
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from "@/utils/supabase/client";
-import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
+import { LoginButton } from "@/components/auth/LoginButton";
+import { LogoutButton } from "@/components/auth/LogoutButton";
+import { User } from '@supabase/supabase-js';
 
-export function Header() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    getUser();
-  }, []);
-
-  async function handleLogin() {
-    // Get the proper redirect URL based on environment
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || location.origin;
-    const redirectUrl = `${baseUrl}/auth/callback`;
-
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUrl,
-      }
-    })
-  }
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    setUser(null);
-    window.location.reload();
-  }
-
+export function Header({ user }: { user: User | null }) {
   return (
     <header className="fixed top-0 left-0 z-10 w-full bg-white/80 backdrop-blur-2xl">
       <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-4">
@@ -48,21 +18,11 @@ export function Header() {
             >
               Mis planillas
             </Link>
-            <button
-              onClick={handleLogout}
-              className="rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-6 py-3 text-white shadow-lg transition-transform hover:scale-105"
-            >
-              Logout
-            </button>
+            <LogoutButton />
             <Image src={user.user_metadata.avatar_url} alt="User avatar" width={40} height={40} className="rounded-full" />
           </div>
         ) : (
-          <button
-            onClick={handleLogin}
-            className="rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-3 text-white shadow-lg transition-transform hover:scale-105"
-          >
-            Login
-          </button>
+          <LoginButton />
         )}
       </div>
     </header>
