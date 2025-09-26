@@ -18,10 +18,14 @@ export function Header() {
   }, []);
 
   async function handleLogin() {
+    // Get the proper redirect URL based on environment
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || location.origin;
+    const redirectUrl = `${baseUrl}/auth/callback`;
+
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: location.origin + '/auth/callback',
+        redirectTo: redirectUrl,
       }
     })
   }
