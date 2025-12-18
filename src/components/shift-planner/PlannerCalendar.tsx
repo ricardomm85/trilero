@@ -1,13 +1,24 @@
 'use client';
 
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
+import { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { ShiftPlanner } from '@/types';
-import { EventInput } from '@fullcalendar/core';
-import esLocale from '@fullcalendar/core/locales/es';
+import type { DateClickArg } from '@fullcalendar/interaction';
 import { differenceInCalendarMonths } from 'date-fns';
 import { formatDateToYYYYMMDD, parseDateString } from '@/utils/dates';
+import type { EventInput } from '@fullcalendar/core';
+
+const CalendarWrapper = dynamic(
+  () => import('./CalendarWrapper'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex justify-center items-center h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    ),
+  }
+);
 
 interface PlannerCalendarProps {
   planner: ShiftPlanner;
@@ -17,30 +28,33 @@ interface PlannerCalendarProps {
 export default function PlannerCalendar({ planner, onDateClick }: PlannerCalendarProps) {
   const { startDate, endDate, staff, assignments, holidays } = planner;
 
-  const events: EventInput[] = Object.entries(assignments).flatMap(([date, staffIds]) => 
-    staffIds.map(staffId => {
-      const person = staff.find(s => s.id === staffId);
-      return {
-        id: `${date}-${staffId}`,
-        title: person?.name || 'Unknown',
-        date,
-        backgroundColor: person?.color || '#808080',
-        borderColor: person?.color || '#808080',
-        textColor: 'white',
-        allDay: true
-      };
-    })
-  );
+  const events: EventInput[] = useMemo(() => {
+    const eventList: EventInput[] = Object.entries(assignments).flatMap(([date, staffIds]) =>
+      staffIds.map(staffId => {
+        const person = staff.find(s => s.id === staffId);
+        return {
+          id: `${date}-${staffId}`,
+          title: person?.name || 'Unknown',
+          date,
+          backgroundColor: person?.color || '#808080',
+          borderColor: person?.color || '#808080',
+          textColor: 'white',
+          allDay: true
+        };
+      })
+    );
 
-  // Add holidays as background events
-  holidays.forEach(holiday => {
-    events.push({
-      id: holiday.date,
-      start: holiday.date,
-      display: 'background',
-      backgroundColor: '#FFD700' // Gold color for holidays
+    holidays.forEach(holiday => {
+      eventList.push({
+        id: holiday.date,
+        start: holiday.date,
+        display: 'background',
+        backgroundColor: '#FFD700'
+      });
     });
-  });
+
+    return eventList;
+  }, [assignments, staff, holidays]);
 
   const monthCount = differenceInCalendarMonths(parseDateString(endDate), parseDateString(startDate)) + 1;
 
@@ -49,32 +63,12 @@ export default function PlannerCalendar({ planner, onDateClick }: PlannerCalenda
 
   return (
     <div className="w-full">
-      <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin]}
-        headerToolbar={{
-          left: 'title',
-          center: '',
-          right: ''
-        }}
-        views={{
-          multiMonth: {
-            type: 'dayGrid',
-            duration: { months: monthCount > 0 ? monthCount : 1 },
-          }
-        }}
-        initialView={'multiMonth'}
-        height={"auto"}
-        locale={esLocale}
-        firstDay={1} // Monday
-        initialDate={startDate}
-        validRange={{
-          start: startDate,
-          end: formatDateToYYYYMMDD(inclusiveEndDate)
-        }}
+      <CalendarWrapper
+        startDate={startDate}
+        endDate={formatDateToYYYYMMDD(inclusiveEndDate)}
+        monthCount={monthCount}
         events={events}
-        dateClick={onDateClick}
-        editable={false}
-        eventTextColor={"#000"}
+        onDateClick={onDateClick}
       />
     </div>
   );
