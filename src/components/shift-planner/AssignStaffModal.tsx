@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { StaffMember } from '@/types';
 import Portal from '@/components/Portal';
 import { format } from 'date-fns';
@@ -16,29 +15,24 @@ interface AssignStaffModalProps {
     assignedStaffIds: string[];
 }
 
-export default function AssignStaffModal({ isOpen, onClose, onSave, staff, day, assignedStaffIds }: AssignStaffModalProps) {
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+function AssignStaffModalContent({ onClose, onSave, staff, day, assignedStaffIds }: Omit<AssignStaffModalProps, 'isOpen'>) {
+    const [selectedIds, setSelectedIds] = useState<string[]>(assignedStaffIds);
     const [searchTerm, setSearchTerm] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (isOpen) {
-            setSelectedIds(assignedStaffIds);
-            // Focus the input when the modal opens
-            setTimeout(() => {
-                inputRef.current?.focus();
-            }, 100); // Small delay to ensure the element is in the DOM
-        }
-    }, [isOpen, assignedStaffIds]);
+        const timer = setTimeout(() => inputRef.current?.focus(), 100);
+        return () => clearTimeout(timer);
+    }, []);
 
-    const unassignedStaff = useMemo(() => 
+    const unassignedStaff = useMemo(() =>
         staff.filter(person => !selectedIds.includes(person.id))
     , [staff, selectedIds]);
 
-    const filteredStaff = useMemo(() => 
-        unassignedStaff.filter(person => 
+    const filteredStaff = useMemo(() =>
+        unassignedStaff.filter(person =>
             person.name.toLowerCase().includes(searchTerm.toLowerCase())
         )
     , [unassignedStaff, searchTerm]);
@@ -47,10 +41,15 @@ export default function AssignStaffModal({ isOpen, onClose, onSave, staff, day, 
         staff.filter(person => selectedIds.includes(person.id))
     , [staff, selectedIds]);
 
-    // Reset highlight when search term or dropdown state changes
-    useEffect(() => {
+    const handleSearchChange = useCallback((value: string) => {
+        setSearchTerm(value);
         setHighlightedIndex(-1);
-    }, [searchTerm, isDropdownOpen]);
+    }, []);
+
+    const handleDropdownToggle = useCallback((open: boolean) => {
+        setIsDropdownOpen(open);
+        setHighlightedIndex(-1);
+    }, []);
 
     const handleSelectStaff = (staffId: string) => {
         setSelectedIds(prev => [...prev, staffId]);
@@ -85,8 +84,6 @@ export default function AssignStaffModal({ isOpen, onClose, onSave, staff, day, 
         }
     };
 
-    if (!isOpen) return null;
-
     return (
         <Portal>
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
@@ -100,12 +97,12 @@ export default function AssignStaffModal({ isOpen, onClose, onSave, staff, day, 
                             type="text"
                             value={searchTerm}
                             onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setIsDropdownOpen(true);
+                                handleSearchChange(e.target.value);
+                                handleDropdownToggle(true);
                             }}
                             onKeyDown={handleKeyDown}
-                            onFocus={() => setIsDropdownOpen(true)}
-                            onBlur={() => setTimeout(() => setIsDropdownOpen(false), 150)}
+                            onFocus={() => handleDropdownToggle(true)}
+                            onBlur={() => setTimeout(() => handleDropdownToggle(false), 150)}
                             placeholder="Buscar personal para añadir..."
                             className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-500"
                         />
@@ -163,4 +160,10 @@ export default function AssignStaffModal({ isOpen, onClose, onSave, staff, day, 
             </div>
         </Portal>
     );
+}
+
+export default function AssignStaffModal({ isOpen, ...props }: AssignStaffModalProps) {
+    if (!isOpen) return null;
+    // Using key to force remount when day changes, resetting all state
+    return <AssignStaffModalContent key={props.day} {...props} />;
 }

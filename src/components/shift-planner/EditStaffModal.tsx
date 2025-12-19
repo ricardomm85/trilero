@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { StaffMember } from '@/types';
 import Portal from '@/components/Portal';
 import ColorPicker from './ColorPicker';
@@ -12,16 +12,9 @@ interface EditStaffModalProps {
     onSave: (updatedStaffMember: StaffMember) => void;
 }
 
-export default function EditStaffModal({ isOpen, onClose, staffMember, onSave }: EditStaffModalProps) {
-    const [name, setName] = useState('');
-    const [color, setColor] = useState('#000000');
-
-    useEffect(() => {
-        if (staffMember) {
-            setName(staffMember.name);
-            setColor(staffMember.color);
-        }
-    }, [staffMember]);
+function EditStaffModalContent({ onClose, staffMember, onSave }: Omit<EditStaffModalProps, 'isOpen'>) {
+    const [name, setName] = useState(staffMember?.name ?? '');
+    const [color, setColor] = useState(staffMember?.color ?? '#000000');
 
     const handleSave = () => {
         if (!staffMember) return;
@@ -35,7 +28,7 @@ export default function EditStaffModal({ isOpen, onClose, staffMember, onSave }:
         onClose();
     };
 
-    if (!isOpen || !staffMember) return null;
+    if (!staffMember) return null;
 
     return (
         <Portal>
@@ -74,3 +67,7 @@ export default function EditStaffModal({ isOpen, onClose, staffMember, onSave }:
     );
 }
 
+export default function EditStaffModal({ isOpen, staffMember, ...props }: EditStaffModalProps) {
+    if (!isOpen || !staffMember) return null;
+    return <EditStaffModalContent key={staffMember.id} staffMember={staffMember} {...props} />;
+}

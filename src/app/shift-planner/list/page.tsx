@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useSyncExternalStore, useCallback } from 'react';
 import Link from 'next/link';
 import { ShiftPlanner } from '@/types';
 import { format } from 'date-fns';
@@ -8,33 +8,34 @@ import { parseDateString } from '@/utils/dates';
 
 const SHIFT_PLANNERS_STORAGE_KEY = 'shiftPlanners';
 
-export default function ShiftPlannerListPage() {
-  const [planners, setPlanners] = useState<ShiftPlanner[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const savedPlanners = localStorage.getItem(SHIFT_PLANNERS_STORAGE_KEY);
-    if (savedPlanners) {
-      setPlanners(JSON.parse(savedPlanners));
-    }
-    setIsLoading(false);
+function usePlanners() {
+  const subscribe = useCallback((callback: () => void) => {
+    window.addEventListener('storage', callback);
+    return () => window.removeEventListener('storage', callback);
   }, []);
+
+  const getSnapshot = useCallback(() => {
+    return localStorage.getItem(SHIFT_PLANNERS_STORAGE_KEY) || '[]';
+  }, []);
+
+  const getServerSnapshot = useCallback(() => '[]', []);
+
+  const plannersJson = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return JSON.parse(plannersJson) as ShiftPlanner[];
+}
+
+export default function ShiftPlannerListPage() {
+  const planners = usePlanners();
+  const [, forceUpdate] = useState({});
 
   const handleDelete = (plannerId: string) => {
     if (window.confirm('¿Estás seguro de que quieres borrar esta planilla?')) {
       const updatedPlanners = planners.filter(p => p.id !== plannerId);
-      setPlanners(updatedPlanners);
       localStorage.setItem(SHIFT_PLANNERS_STORAGE_KEY, JSON.stringify(updatedPlanners));
+      window.dispatchEvent(new Event('storage'));
+      forceUpdate({});
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto p-8">

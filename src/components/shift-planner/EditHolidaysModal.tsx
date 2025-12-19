@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { ShiftPlanner, Holiday } from '@/types';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
@@ -15,15 +15,12 @@ interface EditHolidaysModalProps {
     onSave: (updatedPlanner: ShiftPlanner) => void;
 }
 
-export default function EditHolidaysModal({ isOpen, onClose, planner, onSave }: EditHolidaysModalProps) {
-    const [selectedDays, setSelectedDays] = useState<Date[]>([]);
-
-    useEffect(() => {
-        if (isOpen) {
-            const holidayDates = planner.holidays.map(h => parseDateString(h.date));
-            setSelectedDays(holidayDates);
-        }
-    }, [isOpen, planner.holidays]);
+function EditHolidaysModalContent({ onClose, planner, onSave }: Omit<EditHolidaysModalProps, 'isOpen'>) {
+    const initialDays = useMemo(
+        () => planner.holidays.map(h => parseDateString(h.date)),
+        [planner.holidays]
+    );
+    const [selectedDays, setSelectedDays] = useState<Date[]>(initialDays);
 
     const handleSave = () => {
         const updatedHolidays: Holiday[] = selectedDays.map(day => ({
@@ -38,8 +35,6 @@ export default function EditHolidaysModal({ isOpen, onClose, planner, onSave }: 
         onSave(updatedPlanner);
         onClose();
     };
-
-    if (!isOpen) return null;
 
     return (
         <Portal>
@@ -78,4 +73,9 @@ export default function EditHolidaysModal({ isOpen, onClose, planner, onSave }: 
             </div>
         </Portal>
     );
+}
+
+export default function EditHolidaysModal({ isOpen, ...props }: EditHolidaysModalProps) {
+    if (!isOpen) return null;
+    return <EditHolidaysModalContent key={props.planner.id} {...props} />;
 }

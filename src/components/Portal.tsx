@@ -1,25 +1,27 @@
 'use client';
 
-import { useRef, useEffect, useState, ReactNode } from 'react';
+import { ReactNode, useSyncExternalStore, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
 interface PortalProps {
   children: ReactNode;
-  selector?: string; // Optional selector for the target DOM node
+  selector?: string;
 }
 
 export default function Portal({ children, selector }: PortalProps) {
-  const ref = useRef<Element | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const subscribe = useCallback(() => () => {}, []);
 
-  useEffect(() => {
-    ref.current = selector ? document.querySelector(selector) : document.body;
-    setMounted(true);
+  const getSnapshot = useCallback(() => {
+    return selector ? document.querySelector(selector) : document.body;
   }, [selector]);
 
-  if (!mounted || !ref.current) {
+  const getServerSnapshot = useCallback(() => null, []);
+
+  const container = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  if (!container) {
     return null;
   }
 
-  return createPortal(children, ref.current);
+  return createPortal(children, container);
 }

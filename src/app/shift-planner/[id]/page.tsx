@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useSyncExternalStore, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { ShiftPlanner } from '@/types';
 import PlannerSidebar from '@/components/shift-planner/PlannerSidebar';
@@ -10,32 +10,38 @@ import { DateClickArg } from '@fullcalendar/interaction';
 
 const SHIFT_PLANNERS_STORAGE_KEY = 'shiftPlanners';
 
+function usePlanner(plannerId: string) {
+  const subscribe = useCallback((callback: () => void) => {
+    window.addEventListener('storage', callback);
+    return () => window.removeEventListener('storage', callback);
+  }, []);
+
+  const getSnapshot = useCallback(() => {
+    const allPlanners: ShiftPlanner[] = JSON.parse(localStorage.getItem(SHIFT_PLANNERS_STORAGE_KEY) || '[]');
+    const planner = allPlanners.find(p => p.id === plannerId);
+    return planner ? JSON.stringify(planner) : null;
+  }, [plannerId]);
+
+  const getServerSnapshot = useCallback(() => null, []);
+
+  const plannerJson = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return plannerJson ? JSON.parse(plannerJson) as ShiftPlanner : null;
+}
+
 export default function PlannerDetailPage() {
   const params = useParams();
   const plannerId = params.id as string;
 
-  const [planner, setPlanner] = useState<ShiftPlanner | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const planner = usePlanner(plannerId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
 
-  useEffect(() => {
-    if (!plannerId) return;
-
-    const allPlanners: ShiftPlanner[] = JSON.parse(localStorage.getItem(SHIFT_PLANNERS_STORAGE_KEY) || '[]');
-    const currentPlanner = allPlanners.find(p => p.id === plannerId);
-
-    if (currentPlanner) {
-      setPlanner(currentPlanner);
-    }
-    setIsLoading(false);
-  }, [plannerId]);
-
   const handlePlannerUpdate = (updatedPlanner: ShiftPlanner) => {
-    setPlanner(updatedPlanner);
     const allPlanners: ShiftPlanner[] = JSON.parse(localStorage.getItem(SHIFT_PLANNERS_STORAGE_KEY) || '[]');
     const updatedPlanners = allPlanners.map(p => p.id === updatedPlanner.id ? updatedPlanner : p);
     localStorage.setItem(SHIFT_PLANNERS_STORAGE_KEY, JSON.stringify(updatedPlanners));
+    // Trigger storage event for useSyncExternalStore
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleDateClick = (arg: DateClickArg) => {
@@ -62,14 +68,6 @@ export default function PlannerDetailPage() {
     const updatedPlanner = { ...planner, assignments: updatedAssignments };
     handlePlannerUpdate(updatedPlanner);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
 
   if (!planner) {
     return (

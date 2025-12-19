@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { ShiftPlanner } from '@/types';
 import { DayPicker, DateRange } from 'react-day-picker';
 import { es } from 'date-fns/locale';
@@ -15,21 +15,15 @@ interface EditInfoModalProps {
     onSave: (updatedPlanner: ShiftPlanner) => void;
 }
 
-export default function EditInfoModal({ isOpen, onClose, planner, onSave }: EditInfoModalProps) {
+function EditInfoModalContent({ onClose, planner, onSave }: Omit<EditInfoModalProps, 'isOpen'>) {
     const [name, setName] = useState(planner.name);
 
-    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    const initialDateRange = useMemo(() => ({
         from: parseDateString(planner.startDate),
         to: parseDateString(planner.endDate),
-    });
+    }), [planner.startDate, planner.endDate]);
 
-    useEffect(() => {
-        setName(planner.name);
-        setDateRange({
-            from: parseDateString(planner.startDate),
-            to: parseDateString(planner.endDate),
-        });
-    }, [planner]);
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(initialDateRange);
 
     const handleSave = () => {
         if (!dateRange?.from || !dateRange?.to) return;
@@ -43,8 +37,6 @@ export default function EditInfoModal({ isOpen, onClose, planner, onSave }: Edit
         onSave(updatedPlanner);
         onClose();
     };
-
-    if (!isOpen) return null;
 
     return (
         <Portal>
@@ -91,4 +83,9 @@ export default function EditInfoModal({ isOpen, onClose, planner, onSave }: Edit
             </div>
         </Portal>
     );
+}
+
+export default function EditInfoModal({ isOpen, ...props }: EditInfoModalProps) {
+    if (!isOpen) return null;
+    return <EditInfoModalContent key={props.planner.id} {...props} />;
 }
