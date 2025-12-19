@@ -5,6 +5,7 @@
  * - Rendering planner name prominently
  * - Rendering date range in Spanish format
  * - Edit button with pencil icon
+ * - Export button with download icon
  * - Opening edit modal on button click
  * - Accessibility attributes
  */
@@ -12,6 +13,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import PlannerInfo from './PlannerInfo';
 import { ShiftPlanner } from '@/types';
+import * as plannerUtils from '@/utils/planner';
 
 // Mock EditInfoModal to avoid testing its internals
 vi.mock('./EditInfoModal', () => ({
@@ -82,6 +84,18 @@ describe('PlannerInfo', () => {
             const svg = editButton.querySelector('svg');
             expect(svg).toBeInTheDocument();
         });
+
+        it('renders export button with download icon', () => {
+            const planner = createMockPlanner();
+            render(<PlannerInfo planner={planner} onUpdate={mockOnUpdate} />);
+
+            const exportButton = screen.getByRole('button', { name: /exportar planificador/i });
+            expect(exportButton).toBeInTheDocument();
+
+            // Check for SVG icon inside button
+            const svg = exportButton.querySelector('svg');
+            expect(svg).toBeInTheDocument();
+        });
     });
 
     describe('Edit Modal', () => {
@@ -114,6 +128,20 @@ describe('PlannerInfo', () => {
         });
     });
 
+    describe('Export Functionality', () => {
+        it('calls exportPlannerToFile when export button is clicked', () => {
+            const exportSpy = vi.spyOn(plannerUtils, 'exportPlannerToFile').mockImplementation(() => {});
+            const planner = createMockPlanner();
+            render(<PlannerInfo planner={planner} onUpdate={mockOnUpdate} />);
+
+            const exportButton = screen.getByRole('button', { name: /exportar planificador/i });
+            fireEvent.click(exportButton);
+
+            expect(exportSpy).toHaveBeenCalledWith(planner);
+            exportSpy.mockRestore();
+        });
+    });
+
     describe('Accessibility', () => {
         it('edit button has accessible label', () => {
             const planner = createMockPlanner();
@@ -137,6 +165,31 @@ describe('PlannerInfo', () => {
 
             const editButton = screen.getByRole('button', { name: /editar información/i });
             const svg = editButton.querySelector('svg');
+            expect(svg).toHaveAttribute('aria-hidden', 'true');
+        });
+
+        it('export button has accessible label', () => {
+            const planner = createMockPlanner();
+            render(<PlannerInfo planner={planner} onUpdate={mockOnUpdate} />);
+
+            const exportButton = screen.getByRole('button', { name: /exportar planificador como archivo json/i });
+            expect(exportButton).toBeInTheDocument();
+        });
+
+        it('export button has title for tooltip', () => {
+            const planner = createMockPlanner();
+            render(<PlannerInfo planner={planner} onUpdate={mockOnUpdate} />);
+
+            const exportButton = screen.getByRole('button', { name: /exportar planificador/i });
+            expect(exportButton).toHaveAttribute('title', 'Exportar planificador');
+        });
+
+        it('download icon is hidden from screen readers', () => {
+            const planner = createMockPlanner();
+            render(<PlannerInfo planner={planner} onUpdate={mockOnUpdate} />);
+
+            const exportButton = screen.getByRole('button', { name: /exportar planificador/i });
+            const svg = exportButton.querySelector('svg');
             expect(svg).toHaveAttribute('aria-hidden', 'true');
         });
     });
