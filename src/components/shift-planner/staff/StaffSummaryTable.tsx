@@ -2,9 +2,11 @@
  * StaffSummaryTable Component
  *
  * A reorderable table widget that displays staff members with drag-and-drop
- * functionality for sorting and click-to-edit capability.
+ * functionality for sorting, click-to-edit capability, and an add button.
  *
  * ## Features
+ *
+ * - **Add Staff**: Header includes a "+" button to add new staff members.
  *
  * - **Drag & Drop Reordering**: Each row has a drag handle (hamburger icon) on the left.
  *   Users can drag rows to reorder staff members. The new order is persisted via the
@@ -28,12 +30,14 @@
  * @prop {StaffMember[]} staff - Array of staff members to display
  * @prop {(staff: StaffMember) => void} onEditStaff - Callback when a row is clicked
  * @prop {(staff: StaffMember[]) => void} onUpdateStaff - Callback after reordering
+ * @prop {() => void} onAddStaff - Callback when add button is clicked
  *
  * @example
  * <StaffSummaryTable
  *   staff={plannerStaff}
  *   onEditStaff={(member) => openEditModal(member)}
  *   onUpdateStaff={(newOrder) => savePlanner({ ...planner, staff: newOrder })}
+ *   onAddStaff={() => openAddModal()}
  * />
  */
 'use client';
@@ -45,9 +49,10 @@ interface StaffSummaryTableProps {
     staff: StaffMember[];
     onEditStaff: (staffMember: StaffMember) => void;
     onUpdateStaff: (updatedStaff: StaffMember[]) => void;
+    onAddStaff: () => void;
 }
 
-export default function StaffSummaryTable({ staff, onEditStaff, onUpdateStaff }: StaffSummaryTableProps) {
+export default function StaffSummaryTable({ staff, onEditStaff, onUpdateStaff, onAddStaff }: StaffSummaryTableProps) {
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
     const sortedStaff = useMemo(
@@ -89,7 +94,17 @@ export default function StaffSummaryTable({ staff, onEditStaff, onUpdateStaff }:
 
     return (
         <section>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Personal</h2>
+            <div className="flex items-center justify-between mb-2">
+                <h2 className="text-2xl font-bold text-gray-800">Personal</h2>
+                <button
+                    onClick={onAddStaff}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                    title="Añadir persona"
+                    aria-label="Añadir persona"
+                >
+                    <span className="text-xl leading-none">+</span>
+                </button>
+            </div>
             <p className="text-sm text-gray-500 mb-4">Haz clic en un miembro para editarlo o arrástralo para reordenarlo.</p>
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white rounded-lg shadow">

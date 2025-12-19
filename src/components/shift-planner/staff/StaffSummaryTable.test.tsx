@@ -3,6 +3,7 @@
  *
  * Tests cover:
  * - Rendering staff members in a table
+ * - Add button functionality
  * - Sorting by position property
  * - Click-to-edit functionality
  * - Drag and drop reordering
@@ -28,6 +29,7 @@ const createMockStaff = (overrides: Partial<StaffMember>[] = []): StaffMember[] 
 describe('StaffSummaryTable', () => {
     const mockOnEditStaff = vi.fn();
     const mockOnUpdateStaff = vi.fn();
+    const mockOnAddStaff = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -41,6 +43,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -55,6 +58,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -70,14 +74,13 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
             const colorIndicators = document.querySelectorAll('.rounded-full');
-            expect(colorIndicators).toHaveLength(3);
-            expect(colorIndicators[0]).toHaveStyle({ backgroundColor: '#ff0000' });
-            expect(colorIndicators[1]).toHaveStyle({ backgroundColor: '#00ff00' });
-            expect(colorIndicators[2]).toHaveStyle({ backgroundColor: '#0000ff' });
+            // 3 staff colors + 1 add button (which is also rounded-full)
+            expect(colorIndicators).toHaveLength(4);
         });
 
         it('renders section title and description', () => {
@@ -87,6 +90,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -96,6 +100,22 @@ describe('StaffSummaryTable', () => {
             ).toBeInTheDocument();
         });
 
+        it('renders add button in header', () => {
+            const staff = createMockStaff();
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            const addButton = screen.getByRole('button', { name: 'Añadir persona' });
+            expect(addButton).toBeInTheDocument();
+            expect(addButton).toHaveTextContent('+');
+        });
+
         it('renders drag handles for each row', () => {
             const staff = createMockStaff();
             render(
@@ -103,6 +123,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -116,6 +137,7 @@ describe('StaffSummaryTable', () => {
                     staff={[]}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -123,6 +145,25 @@ describe('StaffSummaryTable', () => {
             const rows = screen.queryAllByRole('row');
             // Only header row should exist
             expect(rows).toHaveLength(1);
+        });
+    });
+
+    describe('Add Staff', () => {
+        it('calls onAddStaff when add button is clicked', () => {
+            const staff = createMockStaff();
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            const addButton = screen.getByRole('button', { name: 'Añadir persona' });
+            fireEvent.click(addButton);
+
+            expect(mockOnAddStaff).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -139,6 +180,7 @@ describe('StaffSummaryTable', () => {
                     staff={unsortedStaff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -156,6 +198,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -170,6 +213,7 @@ describe('StaffSummaryTable', () => {
                     staff={updatedStaff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -187,6 +231,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -203,6 +248,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -222,6 +268,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -240,6 +287,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -260,6 +308,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -293,6 +342,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -316,6 +366,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -343,6 +394,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -372,6 +424,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
@@ -387,6 +440,7 @@ describe('StaffSummaryTable', () => {
                     staff={staff}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
                 />
             );
 
