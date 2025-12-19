@@ -1,3 +1,35 @@
+/**
+ * EditInfoModal Component
+ *
+ * A modal dialog for editing the planner's basic information: name and date range.
+ *
+ * ## Features
+ *
+ * - **Edit Name**: Text input to modify the planner's name.
+ * - **Edit Date Range**: DayPicker component for selecting start and end dates.
+ * - **Save/Cancel**: Buttons to confirm or discard changes.
+ *
+ * ## Implementation Details
+ *
+ * - Uses the wrapper pattern with `key` prop to reset state when planner changes.
+ * - Renders via Portal to ensure proper z-index stacking.
+ * - Uses react-day-picker with Spanish locale for date selection.
+ *
+ * ## Props
+ *
+ * @prop {boolean} isOpen - Controls modal visibility
+ * @prop {() => void} onClose - Callback to close the modal
+ * @prop {ShiftPlanner} planner - The planner to edit
+ * @prop {(planner: ShiftPlanner) => void} onSave - Callback when saving changes
+ *
+ * @example
+ * <EditInfoModal
+ *   isOpen={isModalOpen}
+ *   onClose={() => setIsModalOpen(false)}
+ *   planner={currentPlanner}
+ *   onSave={(updated) => savePlanner(updated)}
+ * />
+ */
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -42,8 +74,8 @@ function EditInfoModalContent({ onClose, planner, onSave }: Omit<EditInfoModalPr
         <Portal>
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
                 <div className="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
-                    <h2 className="text-2xl font-bold mb-6">Editar Detalles de la Planilla</h2>
-                    
+                    <h2 className="text-2xl font-bold mb-6">Editar Planificador</h2>
+
                     <div className="mb-4">
                         <label htmlFor="planner-name" className="block text-sm font-medium text-gray-700 mb-1">
                             Nombre

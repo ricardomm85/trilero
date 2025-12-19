@@ -190,7 +190,7 @@ export default function StaffSummaryTable({ staff, assignments, holidays, onEdit
                 <h2 className="text-2xl font-bold text-gray-800">Personal</h2>
                 <button
                     onClick={onAddStaff}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors cursor-pointer"
                     title="Añadir persona"
                     aria-label="Añadir persona"
                 >

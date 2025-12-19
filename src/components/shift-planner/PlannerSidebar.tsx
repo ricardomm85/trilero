@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
 import { ShiftPlanner, StaffMember } from '@/types';
-import PlannerInfo from './PlannerInfo';
+import { PlannerInfo } from './planner-info';
 import HolidayManager from './HolidayManager';
 import { StaffSummaryTable, EditStaffModal } from './staff';
 
