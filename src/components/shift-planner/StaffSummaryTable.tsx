@@ -1,6 +1,44 @@
+/**
+ * StaffSummaryTable Component
+ *
+ * A reorderable table widget that displays staff members with drag-and-drop
+ * functionality for sorting and click-to-edit capability.
+ *
+ * ## Features
+ *
+ * - **Drag & Drop Reordering**: Each row has a drag handle (hamburger icon) on the left.
+ *   Users can drag rows to reorder staff members. The new order is persisted via the
+ *   `position` property on each StaffMember.
+ *
+ * - **Click to Edit**: Clicking anywhere on a row (except the drag handle during drag)
+ *   triggers the `onEditStaff` callback, allowing the parent to open an edit modal
+ *   where users can modify the staff member's name and color.
+ *
+ * - **Visual Feedback**: The row being dragged shows reduced opacity (50%) to indicate
+ *   it's being moved. Rows highlight on hover to show they're interactive.
+ *
+ * ## Implementation Details
+ *
+ * - Uses native HTML5 Drag and Drop API (no external libraries)
+ * - Uses `useMemo` to derive sorted staff from props (sorted by `position`)
+ * - Updates all `position` values after reorder to maintain contiguous ordering
+ *
+ * ## Props
+ *
+ * @prop {StaffMember[]} staff - Array of staff members to display
+ * @prop {(staff: StaffMember) => void} onEditStaff - Callback when a row is clicked
+ * @prop {(staff: StaffMember[]) => void} onUpdateStaff - Callback after reordering
+ *
+ * @example
+ * <StaffSummaryTable
+ *   staff={plannerStaff}
+ *   onEditStaff={(member) => openEditModal(member)}
+ *   onUpdateStaff={(newOrder) => savePlanner({ ...planner, staff: newOrder })}
+ * />
+ */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { StaffMember } from '@/types';
 
 interface StaffSummaryTableProps {
@@ -10,13 +48,12 @@ interface StaffSummaryTableProps {
 }
 
 export default function StaffSummaryTable({ staff, onEditStaff, onUpdateStaff }: StaffSummaryTableProps) {
-    const [localStaff, setLocalStaff] = useState<StaffMember[]>([]);
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-    useEffect(() => {
-        const sortedStaff = [...staff].sort((a, b) => a.position - b.position);
-        setLocalStaff(sortedStaff);
-    }, [staff]);
+    const sortedStaff = useMemo(
+        () => [...staff].sort((a, b) => a.position - b.position),
+        [staff]
+    );
 
     const handleDragStart = (index: number) => {
         setDraggedIndex(index);
@@ -32,8 +69,8 @@ export default function StaffSummaryTable({ staff, onEditStaff, onUpdateStaff }:
             return;
         }
 
-        const draggedItem = localStaff[draggedIndex];
-        const newStaff = [...localStaff];
+        const draggedItem = sortedStaff[draggedIndex];
+        const newStaff = [...sortedStaff];
         newStaff.splice(draggedIndex, 1);
         newStaff.splice(dropIndex, 0, draggedItem);
 
@@ -64,7 +101,7 @@ export default function StaffSummaryTable({ staff, onEditStaff, onUpdateStaff }:
                         </tr>
                     </thead>
                     <tbody className="text-gray-600 text-sm font-light">
-                        {localStaff.map((person, index) => (
+                        {sortedStaff.map((person, index) => (
                             <tr 
                                 key={person.id} 
                                 onDragOver={handleDragOver}

@@ -1,5 +1,7 @@
 # Trilero
 
+[![Tests](https://github.com/ricardomm85/trilero/actions/workflows/tests.yml/badge.svg)](https://github.com/ricardomm85/trilero/actions/workflows/tests.yml)
+
 A modern shift planner for organizing work schedules with style.
 
 ## Features
@@ -15,9 +17,11 @@ A modern shift planner for organizing work schedules with style.
 | Category | Technology |
 |----------|------------|
 | Framework | Next.js 16 |
+| Runtime | Node.js 24 |
 | UI | React 19 + Tailwind CSS 4 |
 | Calendar | FullCalendar |
 | Language | TypeScript |
+| Testing | Vitest + Testing Library |
 
 ## Quick Start
 
@@ -30,6 +34,9 @@ npm run dev
 
 # Build for production
 npm run build
+
+# Run tests
+npm run test:run
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to start planning shifts.
