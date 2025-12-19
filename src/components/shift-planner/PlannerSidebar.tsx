@@ -80,6 +80,8 @@ export default function PlannerSidebar({ planner, onUpdate }: PlannerSidebarProp
             <HolidayManager planner={planner} onUpdate={onUpdate} />
             <StaffSummaryTable
                 staff={planner.staff}
+                assignments={planner.assignments}
+                holidays={planner.holidays}
                 onEditStaff={handleOpenEditStaffModal}
                 onUpdateStaff={handleUpdateStaffOrder}
                 onAddStaff={handleAddStaff}

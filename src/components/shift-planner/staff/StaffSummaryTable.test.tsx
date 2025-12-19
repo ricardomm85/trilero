@@ -3,6 +3,8 @@
  *
  * Tests cover:
  * - Rendering staff members in a table
+ * - Color as background on name cell
+ * - Shift count columns (diario, vi, sa, do, total)
  * - Add button functionality
  * - Sorting by position property
  * - Click-to-edit functionality
@@ -12,7 +14,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import StaffSummaryTable from './StaffSummaryTable';
-import { StaffMember } from '@/types';
+import { StaffMember, ShiftAssignments, Holiday } from '@/types';
 
 const createMockStaff = (overrides: Partial<StaffMember>[] = []): StaffMember[] => {
     const defaults: StaffMember[] = [
@@ -25,6 +27,21 @@ const createMockStaff = (overrides: Partial<StaffMember>[] = []): StaffMember[] 
         ...overrides[index],
     }));
 };
+
+const emptyAssignments: ShiftAssignments = {};
+const emptyHolidays: Holiday[] = [];
+
+// Create assignments for testing shift counts
+// 2025-01-06 is Monday, 2025-01-10 is Friday, 2025-01-11 is Saturday, 2025-01-12 is Sunday
+const createMockAssignments = (): ShiftAssignments => ({
+    '2025-01-06': ['1'],           // Monday - Alice
+    '2025-01-07': ['1', '2'],      // Tuesday - Alice, Bob
+    '2025-01-08': ['2'],           // Wednesday - Bob
+    '2025-01-09': ['1'],           // Thursday - Alice
+    '2025-01-10': ['1', '3'],      // Friday - Alice, Charlie
+    '2025-01-11': ['2', '3'],      // Saturday - Bob, Charlie
+    '2025-01-12': ['3'],           // Sunday - Charlie
+});
 
 describe('StaffSummaryTable', () => {
     const mockOnEditStaff = vi.fn();
@@ -41,6 +58,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -48,7 +67,11 @@ describe('StaffSummaryTable', () => {
             );
 
             expect(screen.getByText('Nombre')).toBeInTheDocument();
-            expect(screen.getByText('Color')).toBeInTheDocument();
+            expect(screen.getByText('L-J')).toBeInTheDocument();
+            expect(screen.getByText('Vi')).toBeInTheDocument();
+            expect(screen.getByText('Sa')).toBeInTheDocument();
+            expect(screen.getByText('Do')).toBeInTheDocument();
+            expect(screen.getByText('Tot')).toBeInTheDocument();
         });
 
         it('renders all staff members', () => {
@@ -56,6 +79,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -67,20 +92,21 @@ describe('StaffSummaryTable', () => {
             expect(screen.getByText('Charlie')).toBeInTheDocument();
         });
 
-        it('renders color indicators for each staff member', () => {
+        it('renders name cell with staff color as background', () => {
             const staff = createMockStaff();
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
                 />
             );
 
-            const colorIndicators = document.querySelectorAll('.rounded-full');
-            // 3 staff colors + 1 add button (which is also rounded-full)
-            expect(colorIndicators).toHaveLength(4);
+            const aliceCell = screen.getByText('Alice');
+            expect(aliceCell).toHaveStyle({ backgroundColor: '#ff0000' });
         });
 
         it('renders section title and description', () => {
@@ -88,6 +114,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -105,6 +133,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -121,6 +151,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -135,6 +167,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={[]}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -148,12 +182,202 @@ describe('StaffSummaryTable', () => {
         });
     });
 
+    describe('Shift Counts', () => {
+        it('calculates daily count (Mon-Thu) correctly', () => {
+            const staff = createMockStaff();
+            const assignments = createMockAssignments();
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    assignments={assignments}
+                    holidays={emptyHolidays}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            // Alice has Mon, Tue, Thu = 3 daily shifts
+            // Bob has Tue, Wed = 2 daily shifts
+            // Charlie has 0 daily shifts
+            const rows = screen.getAllByRole('row');
+            // Row 1 is header, rows 2-4 are data
+            // Each row has 7 cells: drag, name, diario, vi, sa, do, total
+            const aliceRow = rows[1];
+            const bobRow = rows[2];
+            const charlieRow = rows[3];
+
+            expect(aliceRow.querySelectorAll('td')[2]).toHaveTextContent('3');
+            expect(bobRow.querySelectorAll('td')[2]).toHaveTextContent('2');
+            expect(charlieRow.querySelectorAll('td')[2]).toHaveTextContent('0');
+        });
+
+        it('calculates friday count correctly', () => {
+            const staff = createMockStaff();
+            const assignments = createMockAssignments();
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    assignments={assignments}
+                    holidays={emptyHolidays}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            // Alice has 1 Friday, Bob has 0, Charlie has 1
+            const rows = screen.getAllByRole('row');
+            const aliceRow = rows[1];
+            const bobRow = rows[2];
+            const charlieRow = rows[3];
+
+            expect(aliceRow.querySelectorAll('td')[3]).toHaveTextContent('1');
+            expect(bobRow.querySelectorAll('td')[3]).toHaveTextContent('0');
+            expect(charlieRow.querySelectorAll('td')[3]).toHaveTextContent('1');
+        });
+
+        it('calculates saturday count correctly', () => {
+            const staff = createMockStaff();
+            const assignments = createMockAssignments();
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    assignments={assignments}
+                    holidays={emptyHolidays}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            // Alice has 0 Saturday, Bob has 1, Charlie has 1
+            const rows = screen.getAllByRole('row');
+            const aliceRow = rows[1];
+            const bobRow = rows[2];
+            const charlieRow = rows[3];
+
+            expect(aliceRow.querySelectorAll('td')[4]).toHaveTextContent('0');
+            expect(bobRow.querySelectorAll('td')[4]).toHaveTextContent('1');
+            expect(charlieRow.querySelectorAll('td')[4]).toHaveTextContent('1');
+        });
+
+        it('calculates sunday count correctly', () => {
+            const staff = createMockStaff();
+            const assignments = createMockAssignments();
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    assignments={assignments}
+                    holidays={emptyHolidays}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            // Alice has 0 Sunday, Bob has 0, Charlie has 1
+            const rows = screen.getAllByRole('row');
+            const aliceRow = rows[1];
+            const bobRow = rows[2];
+            const charlieRow = rows[3];
+
+            expect(aliceRow.querySelectorAll('td')[5]).toHaveTextContent('0');
+            expect(bobRow.querySelectorAll('td')[5]).toHaveTextContent('0');
+            expect(charlieRow.querySelectorAll('td')[5]).toHaveTextContent('1');
+        });
+
+        it('calculates total count correctly', () => {
+            const staff = createMockStaff();
+            const assignments = createMockAssignments();
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    assignments={assignments}
+                    holidays={emptyHolidays}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            // Alice: 3 daily + 1 fri = 4 total
+            // Bob: 2 daily + 1 sat = 3 total
+            // Charlie: 1 fri + 1 sat + 1 sun = 3 total
+            const rows = screen.getAllByRole('row');
+            const aliceRow = rows[1];
+            const bobRow = rows[2];
+            const charlieRow = rows[3];
+
+            expect(aliceRow.querySelectorAll('td')[6]).toHaveTextContent('4');
+            expect(bobRow.querySelectorAll('td')[6]).toHaveTextContent('3');
+            expect(charlieRow.querySelectorAll('td')[6]).toHaveTextContent('3');
+        });
+
+        it('shows zero counts when no assignments', () => {
+            const staff = createMockStaff();
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            const rows = screen.getAllByRole('row');
+            const aliceRow = rows[1];
+
+            // All counts should be 0
+            expect(aliceRow.querySelectorAll('td')[2]).toHaveTextContent('0');
+            expect(aliceRow.querySelectorAll('td')[3]).toHaveTextContent('0');
+            expect(aliceRow.querySelectorAll('td')[4]).toHaveTextContent('0');
+            expect(aliceRow.querySelectorAll('td')[5]).toHaveTextContent('0');
+            expect(aliceRow.querySelectorAll('td')[6]).toHaveTextContent('0');
+        });
+
+        it('counts holidays as sundays regardless of actual day', () => {
+            const staff = createMockStaff();
+            // 2025-01-06 is Monday, but we mark it as a holiday
+            const assignments: ShiftAssignments = {
+                '2025-01-06': ['1'],  // Monday (holiday) - Alice
+                '2025-01-07': ['1'],  // Tuesday - Alice
+            };
+            const holidays: Holiday[] = [
+                { date: '2025-01-06', name: 'Test Holiday' },
+            ];
+
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    assignments={assignments}
+                    holidays={holidays}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            const rows = screen.getAllByRole('row');
+            const aliceRow = rows[1];
+
+            // Alice: 1 daily (Tuesday) + 1 sunday (Monday holiday) = 2 total
+            expect(aliceRow.querySelectorAll('td')[2]).toHaveTextContent('1'); // L-J (only Tuesday)
+            expect(aliceRow.querySelectorAll('td')[5]).toHaveTextContent('1'); // Do (Monday as holiday)
+            expect(aliceRow.querySelectorAll('td')[6]).toHaveTextContent('2'); // Total
+        });
+    });
+
     describe('Add Staff', () => {
         it('calls onAddStaff when add button is clicked', () => {
             const staff = createMockStaff();
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -178,17 +402,19 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={unsortedStaff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
                 />
             );
 
-            const cells = screen.getAllByRole('cell');
-            // Each row has 3 cells: drag handle, name, color
-            // Find name cells (index 1, 4, 7)
-            const names = [cells[1].textContent, cells[4].textContent, cells[7].textContent];
-            expect(names).toEqual(['Alice', 'Bob', 'Charlie']);
+            const rows = screen.getAllByRole('row');
+            // Row 0 is header, rows 1-3 are data
+            expect(rows[1].querySelectorAll('td')[1]).toHaveTextContent('Alice');
+            expect(rows[2].querySelectorAll('td')[1]).toHaveTextContent('Bob');
+            expect(rows[3].querySelectorAll('td')[1]).toHaveTextContent('Charlie');
         });
 
         it('maintains sort order when staff prop changes', () => {
@@ -196,6 +422,8 @@ describe('StaffSummaryTable', () => {
             const { rerender } = render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -211,15 +439,18 @@ describe('StaffSummaryTable', () => {
             rerender(
                 <StaffSummaryTable
                     staff={updatedStaff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
                 />
             );
 
-            const cells = screen.getAllByRole('cell');
-            const names = [cells[1].textContent, cells[4].textContent, cells[7].textContent];
-            expect(names).toEqual(['Bob', 'Alice', 'Charlie']);
+            const rows = screen.getAllByRole('row');
+            expect(rows[1].querySelectorAll('td')[1]).toHaveTextContent('Bob');
+            expect(rows[2].querySelectorAll('td')[1]).toHaveTextContent('Alice');
+            expect(rows[3].querySelectorAll('td')[1]).toHaveTextContent('Charlie');
         });
     });
 
@@ -229,6 +460,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -246,6 +479,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -266,6 +501,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -285,6 +522,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -306,6 +545,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -340,6 +581,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -364,6 +607,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -392,6 +637,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -422,6 +669,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -429,7 +678,7 @@ describe('StaffSummaryTable', () => {
             );
 
             expect(screen.getByRole('table')).toBeInTheDocument();
-            expect(screen.getAllByRole('columnheader')).toHaveLength(3);
+            expect(screen.getAllByRole('columnheader')).toHaveLength(7); // drag, name, diario, vi, sa, do, total
             expect(screen.getAllByRole('row')).toHaveLength(4); // 1 header + 3 data rows
         });
 
@@ -438,6 +687,8 @@ describe('StaffSummaryTable', () => {
             render(
                 <StaffSummaryTable
                     staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
                     onEditStaff={mockOnEditStaff}
                     onUpdateStaff={mockOnUpdateStaff}
                     onAddStaff={mockOnAddStaff}
@@ -446,6 +697,25 @@ describe('StaffSummaryTable', () => {
 
             const dragHandles = screen.getAllByTitle('Arrastrar para reordenar');
             expect(dragHandles).toHaveLength(3);
+        });
+
+        it('column headers have tooltips for abbreviations', () => {
+            const staff = createMockStaff();
+            render(
+                <StaffSummaryTable
+                    staff={staff}
+                    assignments={emptyAssignments}
+                    holidays={emptyHolidays}
+                    onEditStaff={mockOnEditStaff}
+                    onUpdateStaff={mockOnUpdateStaff}
+                    onAddStaff={mockOnAddStaff}
+                />
+            );
+
+            expect(screen.getByTitle('Lunes a Jueves')).toBeInTheDocument();
+            expect(screen.getByTitle('Viernes')).toBeInTheDocument();
+            expect(screen.getByTitle('Sábado')).toBeInTheDocument();
+            expect(screen.getByTitle('Domingo')).toBeInTheDocument();
         });
     });
 });

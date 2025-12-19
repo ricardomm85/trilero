@@ -64,6 +64,7 @@ Data is stored in `localStorage` under key `shiftPlanners` as JSON array.
 - **Do not commit** unless explicitly asked
 - **Never use** `git commit --no-verify`
 - **No Claude references in commits** - Do not include "Generated with Claude", "Co-Authored-By: Claude", or similar references in commit messages
+- **Update JSDoc headers** - When modifying a component, always update its JSDoc header comment to reflect changes (props, features, implementation details)
 - **Prefer native APIs over libraries** - Use built-in browser APIs before adding dependencies:
   - HTML5 Drag and Drop API (no external drag libraries)
   - Fetch API (no axios)
