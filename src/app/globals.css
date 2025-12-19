@@ -3,3 +3,27 @@
 .day-in-odd-month {
   background-color: #F0F0F0;
 }
+
+/* FullCalendar custom button styles */
+.fc .fc-button-primary {
+  background-color: #7c3aed;
+  border-color: #7c3aed;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  transition: all 0.2s;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #6d28d9;
+  border-color: #6d28d9;
+}
+
+.fc .fc-button-primary:focus {
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.3);
+}
+
+.fc .fc-button-primary:disabled {
+  background-color: #a78bfa;
+  border-color: #a78bfa;
+}

@@ -72,6 +72,12 @@ Data is stored in `localStorage` under key `shiftPlanners` as JSON array.
   - CSS animations over JS animation libraries
   - Intl API for formatting dates/numbers
 - **Use nanoid(6)** - Always use 6-character IDs: `nanoid(6)`. This provides sufficient uniqueness for local storage while keeping IDs short.
+- **Use Spinner component** - Always use `<Spinner />` from `@/components/ui` for loading states. Supports sizes: `sm`, `md` (default), `lg`.
+
+## UI Components (`src/components/ui/`)
+
+Reusable UI components shared across the application:
+- `Spinner` - Loading spinner with consistent purple styling
 
 ## Testing
 

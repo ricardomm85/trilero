@@ -12,6 +12,8 @@ interface CalendarWrapperProps {
   monthCount: number;
   events: EventInput[];
   onDateClick: (arg: DateClickArg) => void;
+  onExportPdf?: () => void;
+  isExportingPdf?: boolean;
 }
 
 export default function CalendarWrapper({
@@ -20,14 +22,26 @@ export default function CalendarWrapper({
   monthCount,
   events,
   onDateClick,
+  onExportPdf,
+  isExportingPdf,
 }: CalendarWrapperProps) {
   return (
     <FullCalendar
       plugins={[dayGridPlugin, interactionPlugin]}
+      customButtons={{
+        exportPdf: {
+          text: isExportingPdf ? 'Generando...' : 'Generar PDF',
+          click: () => {
+            if (!isExportingPdf) {
+              onExportPdf?.();
+            }
+          },
+        },
+      }}
       headerToolbar={{
         left: 'title',
         center: '',
-        right: ''
+        right: onExportPdf ? 'exportPdf' : '',
       }}
       views={{
         multiMonth: {
