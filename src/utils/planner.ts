@@ -171,7 +171,7 @@ export function importPlannerFromJson(jsonString: string): ShiftPlanner {
 
     return {
         ...validatedData,
-        id: nanoid(),
+        id: nanoid(6),
         creationDate: new Date().toISOString(),
     };
 }

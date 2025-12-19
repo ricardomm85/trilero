@@ -34,7 +34,7 @@ export default function PlannerSidebar({ planner, onUpdate }: PlannerSidebarProp
 
     const handleAddStaff = () => {
         const newStaff: StaffMember = {
-            id: nanoid(),
+            id: nanoid(6),
             name: `Persona ${planner.staff.length + 1}`,
             color: STAFF_COLORS[planner.staff.length % STAFF_COLORS.length],
             position: planner.staff.length,

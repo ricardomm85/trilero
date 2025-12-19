@@ -37,7 +37,7 @@ npm run test:run # Run tests once
 ### Data Model (`src/types/index.ts`)
 ```typescript
 ShiftPlanner {
-  id: string           // nanoid
+  id: string           // nanoid(6)
   name: string
   startDate: string    // YYYY-MM-DD
   endDate: string      // YYYY-MM-DD
@@ -71,6 +71,7 @@ Data is stored in `localStorage` under key `shiftPlanners` as JSON array.
   - Native form validation
   - CSS animations over JS animation libraries
   - Intl API for formatting dates/numbers
+- **Use nanoid(6)** - Always use 6-character IDs: `nanoid(6)`. This provides sufficient uniqueness for local storage while keeping IDs short.
 
 ## Testing
 
