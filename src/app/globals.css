@@ -27,3 +27,15 @@
   background-color: #a78bfa;
   border-color: #a78bfa;
 }
+
+/* Sticky weekday headers - override FullCalendar's default sticky positioning */
+.fc .fc-scrollgrid-section-header {
+  position: sticky;
+  top: 5rem;
+  z-index: 5;
+  background-color: white;
+}
+
+.fc .fc-col-header {
+  background-color: white;
+}

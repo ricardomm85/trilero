@@ -34,10 +34,11 @@ export default function PlannerCalendar({ planner, onDateClick, onUpdate }: Plan
 
   const handleEventDrop = useCallback((arg: EventDropArg) => {
     const eventId = arg.event.id;
-    // Event ID format: "YYYY-MM-DD-staffId"
-    const lastDashIndex = eventId.lastIndexOf('-');
-    const oldDate = eventId.substring(0, lastDashIndex);
-    const staffId = eventId.substring(lastDashIndex + 1);
+    // Event ID format: "YYYY-MM-DD::staffId" (using :: as separator to avoid conflicts with IDs containing dashes)
+    const separatorIndex = eventId.indexOf('::');
+    if (separatorIndex === -1) return; // Invalid format, ignore
+    const oldDate = eventId.substring(0, separatorIndex);
+    const staffId = eventId.substring(separatorIndex + 2);
     const newDate = format(arg.event.start!, 'yyyy-MM-dd');
 
     if (oldDate === newDate) return;
@@ -79,18 +80,20 @@ export default function PlannerCalendar({ planner, onDateClick, onUpdate }: Plan
 
   const events: EventInput[] = useMemo(() => {
     const eventList: EventInput[] = Object.entries(assignments).flatMap(([date, staffIds]) =>
-      staffIds.map(staffId => {
-        const person = staff.find(s => s.id === staffId);
-        return {
-          id: `${date}-${staffId}`,
-          title: person?.name || 'Unknown',
-          date,
-          backgroundColor: person?.color || '#808080',
-          borderColor: person?.color || '#808080',
-          textColor: 'white',
-          allDay: true
-        };
-      })
+      staffIds
+        .filter(staffId => staff.some(s => s.id === staffId)) // Filter out orphan assignments
+        .map(staffId => {
+          const person = staff.find(s => s.id === staffId)!;
+          return {
+            id: `${date}::${staffId}`,
+            title: person.name,
+            date,
+            backgroundColor: person.color,
+            borderColor: person.color,
+            textColor: 'white',
+            allDay: true
+          };
+        })
     );
 
     holidays.forEach(holiday => {
