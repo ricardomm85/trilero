@@ -20,7 +20,8 @@
  *   - L-J: Monday-Thursday shifts
  *   - Vi: Friday shifts
  *   - Sa: Saturday shifts
- *   - Do: Sunday shifts (holidays are counted here regardless of actual day)
+ *   - Do: Sunday shifts (only actual Sundays, not holidays)
+ *   - Fe: Holiday shifts (days marked as holidays in the planner)
  *   - Tot: Total shifts
  *
  * - **Visual Feedback**: The row being dragged shows reduced opacity (50%) to indicate
@@ -32,14 +33,14 @@
  * - Uses native HTML5 Drag and Drop API (no external libraries)
  * - Uses `useMemo` to derive sorted staff from props (sorted by `position`)
  * - Calculates shift statistics from assignments prop
- * - Holidays count as Sundays for shift statistics
+ * - Holidays are counted in a separate column from Sundays
  * - Updates all `position` values after reorder to maintain contiguous ordering
  *
  * ## Props
  *
  * @prop {StaffMember[]} staff - Array of staff members to display
  * @prop {ShiftAssignments} assignments - Assignment data to calculate shift counts
- * @prop {Holiday[]} holidays - Holiday dates (counted as Sundays in statistics)
+ * @prop {Holiday[]} holidays - Holiday dates (counted in separate Fe column)
  * @prop {(staff: StaffMember) => void} onEditStaff - Callback when a row is clicked
  * @prop {(staff: StaffMember[]) => void} onUpdateStaff - Callback after reordering
  * @prop {() => void} onAddStaff - Callback when add button is clicked
@@ -64,6 +65,7 @@ interface StaffShiftCounts {
     friday: number;
     saturday: number;
     sunday: number;
+    holiday: number;
     total: number;
 }
 
@@ -78,7 +80,7 @@ interface StaffSummaryTableProps {
 
 /**
  * Calculate shift counts for a staff member based on assignments
- * Holidays are counted as Sundays regardless of the actual day of the week
+ * Holidays are counted separately from Sundays
  */
 function calculateShiftCounts(staffId: string, assignments: ShiftAssignments, holidayDates: Set<string>): StaffShiftCounts {
     const counts: StaffShiftCounts = {
@@ -86,6 +88,7 @@ function calculateShiftCounts(staffId: string, assignments: ShiftAssignments, ho
         friday: 0,
         saturday: 0,
         sunday: 0,
+        holiday: 0,
         total: 0,
     };
 
@@ -93,9 +96,9 @@ function calculateShiftCounts(staffId: string, assignments: ShiftAssignments, ho
         if (assignments[dateStr].includes(staffId)) {
             counts.total++;
 
-            // Holidays count as Sundays
+            // Holidays count separately
             if (holidayDates.has(dateStr)) {
-                counts.sunday++;
+                counts.holiday++;
                 continue;
             }
 
@@ -208,12 +211,13 @@ export default function StaffSummaryTable({ staff, assignments, holidays, onEdit
                             <th className="py-2 px-1 text-center w-8" title="Viernes">Vi</th>
                             <th className="py-2 px-1 text-center w-8" title="Sábado">Sa</th>
                             <th className="py-2 px-1 text-center w-8" title="Domingo">Do</th>
+                            <th className="py-2 px-1 text-center w-8" title="Festivos">Fe</th>
                             <th className="py-2 px-1 text-center w-8">Tot</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-600">
                         {sortedStaff.map((person, index) => {
-                            const counts = staffCounts[person.id] || { daily: 0, friday: 0, saturday: 0, sunday: 0, total: 0 };
+                            const counts = staffCounts[person.id] || { daily: 0, friday: 0, saturday: 0, sunday: 0, holiday: 0, total: 0 };
                             return (
                                 <tr
                                     key={person.id}
@@ -247,6 +251,7 @@ export default function StaffSummaryTable({ staff, assignments, holidays, onEdit
                                     <td className="py-2 px-1 text-center">{counts.friday}</td>
                                     <td className="py-2 px-1 text-center">{counts.saturday}</td>
                                     <td className="py-2 px-1 text-center">{counts.sunday}</td>
+                                    <td className="py-2 px-1 text-center">{counts.holiday}</td>
                                     <td className="py-2 px-1 text-center font-semibold">{counts.total}</td>
                                 </tr>
                             );

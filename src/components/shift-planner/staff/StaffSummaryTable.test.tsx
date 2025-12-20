@@ -4,7 +4,7 @@
  * Tests cover:
  * - Rendering staff members in a table
  * - Color as background on name cell
- * - Shift count columns (diario, vi, sa, do, total)
+ * - Shift count columns (diario, vi, sa, do, fe, total)
  * - Add button functionality
  * - Sorting by position property
  * - Click-to-edit functionality
@@ -71,6 +71,7 @@ describe('StaffSummaryTable', () => {
             expect(screen.getByText('Vi')).toBeInTheDocument();
             expect(screen.getByText('Sa')).toBeInTheDocument();
             expect(screen.getByText('Do')).toBeInTheDocument();
+            expect(screen.getByText('Fe')).toBeInTheDocument();
             expect(screen.getByText('Tot')).toBeInTheDocument();
         });
 
@@ -202,7 +203,7 @@ describe('StaffSummaryTable', () => {
             // Charlie has 0 daily shifts
             const rows = screen.getAllByRole('row');
             // Row 1 is header, rows 2-4 are data
-            // Each row has 7 cells: drag, name, diario, vi, sa, do, total
+            // Each row has 8 cells: drag, name, diario, vi, sa, do, fe, total
             const aliceRow = rows[1];
             const bobRow = rows[2];
             const charlieRow = rows[3];
@@ -309,9 +310,9 @@ describe('StaffSummaryTable', () => {
             const bobRow = rows[2];
             const charlieRow = rows[3];
 
-            expect(aliceRow.querySelectorAll('td')[6]).toHaveTextContent('4');
-            expect(bobRow.querySelectorAll('td')[6]).toHaveTextContent('3');
-            expect(charlieRow.querySelectorAll('td')[6]).toHaveTextContent('3');
+            expect(aliceRow.querySelectorAll('td')[7]).toHaveTextContent('4');
+            expect(bobRow.querySelectorAll('td')[7]).toHaveTextContent('3');
+            expect(charlieRow.querySelectorAll('td')[7]).toHaveTextContent('3');
         });
 
         it('shows zero counts when no assignments', () => {
@@ -331,19 +332,21 @@ describe('StaffSummaryTable', () => {
             const aliceRow = rows[1];
 
             // All counts should be 0
-            expect(aliceRow.querySelectorAll('td')[2]).toHaveTextContent('0');
-            expect(aliceRow.querySelectorAll('td')[3]).toHaveTextContent('0');
-            expect(aliceRow.querySelectorAll('td')[4]).toHaveTextContent('0');
-            expect(aliceRow.querySelectorAll('td')[5]).toHaveTextContent('0');
-            expect(aliceRow.querySelectorAll('td')[6]).toHaveTextContent('0');
+            expect(aliceRow.querySelectorAll('td')[2]).toHaveTextContent('0'); // L-J
+            expect(aliceRow.querySelectorAll('td')[3]).toHaveTextContent('0'); // Vi
+            expect(aliceRow.querySelectorAll('td')[4]).toHaveTextContent('0'); // Sa
+            expect(aliceRow.querySelectorAll('td')[5]).toHaveTextContent('0'); // Do
+            expect(aliceRow.querySelectorAll('td')[6]).toHaveTextContent('0'); // Fe
+            expect(aliceRow.querySelectorAll('td')[7]).toHaveTextContent('0'); // Tot
         });
 
-        it('counts holidays as sundays regardless of actual day', () => {
+        it('counts holidays in separate column from sundays', () => {
             const staff = createMockStaff();
-            // 2025-01-06 is Monday, but we mark it as a holiday
+            // 2025-01-06 is Monday (holiday), 2025-01-07 is Tuesday, 2025-01-12 is Sunday
             const assignments: ShiftAssignments = {
                 '2025-01-06': ['1'],  // Monday (holiday) - Alice
                 '2025-01-07': ['1'],  // Tuesday - Alice
+                '2025-01-12': ['1'],  // Sunday - Alice
             };
             const holidays: Holiday[] = [
                 { date: '2025-01-06', name: 'Test Holiday' },
@@ -363,10 +366,11 @@ describe('StaffSummaryTable', () => {
             const rows = screen.getAllByRole('row');
             const aliceRow = rows[1];
 
-            // Alice: 1 daily (Tuesday) + 1 sunday (Monday holiday) = 2 total
+            // Alice: 1 daily (Tuesday) + 1 sunday + 1 holiday = 3 total
             expect(aliceRow.querySelectorAll('td')[2]).toHaveTextContent('1'); // L-J (only Tuesday)
-            expect(aliceRow.querySelectorAll('td')[5]).toHaveTextContent('1'); // Do (Monday as holiday)
-            expect(aliceRow.querySelectorAll('td')[6]).toHaveTextContent('2'); // Total
+            expect(aliceRow.querySelectorAll('td')[5]).toHaveTextContent('1'); // Do (actual Sunday)
+            expect(aliceRow.querySelectorAll('td')[6]).toHaveTextContent('1'); // Fe (Monday as holiday)
+            expect(aliceRow.querySelectorAll('td')[7]).toHaveTextContent('3'); // Total
         });
     });
 
@@ -678,7 +682,7 @@ describe('StaffSummaryTable', () => {
             );
 
             expect(screen.getByRole('table')).toBeInTheDocument();
-            expect(screen.getAllByRole('columnheader')).toHaveLength(7); // drag, name, diario, vi, sa, do, total
+            expect(screen.getAllByRole('columnheader')).toHaveLength(8); // drag, name, diario, vi, sa, do, fe, total
             expect(screen.getAllByRole('row')).toHaveLength(4); // 1 header + 3 data rows
         });
 
@@ -716,6 +720,7 @@ describe('StaffSummaryTable', () => {
             expect(screen.getByTitle('Viernes')).toBeInTheDocument();
             expect(screen.getByTitle('Sábado')).toBeInTheDocument();
             expect(screen.getByTitle('Domingo')).toBeInTheDocument();
+            expect(screen.getByTitle('Festivos')).toBeInTheDocument();
         });
     });
 });
