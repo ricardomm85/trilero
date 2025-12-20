@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 import { ShiftPlanner, StaffMember } from '@/types';
 import { PlannerInfo } from './planner-info';
 import HolidayManager from './HolidayManager';
-import { StaffSummaryTable, EditStaffModal } from './staff';
+import { StaffSummaryTable, EditStaffModal, AddStaffModal } from './staff';
 
 // Default colors for new staff members (cycles through these)
 const STAFF_COLORS = [
@@ -20,6 +20,7 @@ interface PlannerSidebarProps {
 
 export default function PlannerSidebar({ planner, onUpdate }: PlannerSidebarProps) {
     const [isEditStaffModalOpen, setIsEditStaffModalOpen] = useState(false);
+    const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
     const [editingStaffMember, setEditingStaffMember] = useState<StaffMember | null>(null);
 
     const handleOpenEditStaffModal = (staffMember: StaffMember) => {
@@ -32,17 +33,18 @@ export default function PlannerSidebar({ planner, onUpdate }: PlannerSidebarProp
         setIsEditStaffModalOpen(false);
     };
 
-    const handleAddStaff = () => {
-        const newStaff: StaffMember = {
+    const handleOpenAddStaffModal = () => {
+        setIsAddStaffModalOpen(true);
+    };
+
+    const handleAddStaff = (names: string[], color: string) => {
+        const newStaffMembers: StaffMember[] = names.map((name, index) => ({
             id: nanoid(6),
-            name: `Persona ${planner.staff.length + 1}`,
-            color: STAFF_COLORS[planner.staff.length % STAFF_COLORS.length],
-            position: planner.staff.length,
-        };
-        onUpdate({ ...planner, staff: [...planner.staff, newStaff] });
-        // Open edit modal immediately so user can customize
-        setEditingStaffMember(newStaff);
-        setIsEditStaffModalOpen(true);
+            name,
+            color,
+            position: planner.staff.length + index,
+        }));
+        onUpdate({ ...planner, staff: [...planner.staff, ...newStaffMembers] });
     };
 
     const handleSaveStaff = (updatedStaffMember: StaffMember) => {
@@ -84,7 +86,14 @@ export default function PlannerSidebar({ planner, onUpdate }: PlannerSidebarProp
                 holidays={planner.holidays}
                 onEditStaff={handleOpenEditStaffModal}
                 onUpdateStaff={handleUpdateStaffOrder}
-                onAddStaff={handleAddStaff}
+                onAddStaff={handleOpenAddStaffModal}
+            />
+
+            <AddStaffModal
+                isOpen={isAddStaffModalOpen}
+                onClose={() => setIsAddStaffModalOpen(false)}
+                defaultColor={STAFF_COLORS[planner.staff.length % STAFF_COLORS.length]}
+                onAdd={handleAddStaff}
             />
 
             <EditStaffModal
