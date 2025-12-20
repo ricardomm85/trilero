@@ -4,11 +4,11 @@ import { useMemo, useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ShiftPlanner } from '@/types';
 import type { DateClickArg } from '@fullcalendar/interaction';
-import { differenceInCalendarMonths } from 'date-fns';
+import type { EventInput, EventDropArg } from '@fullcalendar/core';
+import { differenceInCalendarMonths, format } from 'date-fns';
 import { formatDateToYYYYMMDD, parseDateString } from '@/utils/dates';
 import { generateCalendarPDF } from '@/utils/calendar-pdf';
 import { Spinner } from '@/components/ui';
-import type { EventInput } from '@fullcalendar/core';
 
 const CalendarWrapper = dynamic(
   () => import('./CalendarWrapper'),
@@ -25,11 +25,43 @@ const CalendarWrapper = dynamic(
 interface PlannerCalendarProps {
   planner: ShiftPlanner;
   onDateClick: (arg: DateClickArg) => void;
+  onUpdate: (planner: ShiftPlanner) => void;
 }
 
-export default function PlannerCalendar({ planner, onDateClick }: PlannerCalendarProps) {
+export default function PlannerCalendar({ planner, onDateClick, onUpdate }: PlannerCalendarProps) {
   const { startDate, endDate, staff, assignments, holidays } = planner;
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+
+  const handleEventDrop = useCallback((arg: EventDropArg) => {
+    const eventId = arg.event.id;
+    // Event ID format: "YYYY-MM-DD-staffId"
+    const lastDashIndex = eventId.lastIndexOf('-');
+    const oldDate = eventId.substring(0, lastDashIndex);
+    const staffId = eventId.substring(lastDashIndex + 1);
+    const newDate = format(arg.event.start!, 'yyyy-MM-dd');
+
+    if (oldDate === newDate) return;
+
+    const updatedAssignments = { ...assignments };
+
+    // Remove from old date
+    if (updatedAssignments[oldDate]) {
+      updatedAssignments[oldDate] = updatedAssignments[oldDate].filter(id => id !== staffId);
+      if (updatedAssignments[oldDate].length === 0) {
+        delete updatedAssignments[oldDate];
+      }
+    }
+
+    // Add to new date
+    if (!updatedAssignments[newDate]) {
+      updatedAssignments[newDate] = [];
+    }
+    if (!updatedAssignments[newDate].includes(staffId)) {
+      updatedAssignments[newDate].push(staffId);
+    }
+
+    onUpdate({ ...planner, assignments: updatedAssignments });
+  }, [assignments, planner, onUpdate]);
 
   const handleExportPdf = useCallback(async () => {
     if (isExportingPdf) return;
@@ -86,6 +118,7 @@ export default function PlannerCalendar({ planner, onDateClick }: PlannerCalenda
         monthCount={monthCount}
         events={events}
         onDateClick={onDateClick}
+        onEventDrop={handleEventDrop}
         onExportPdf={handleExportPdf}
         isExportingPdf={isExportingPdf}
       />

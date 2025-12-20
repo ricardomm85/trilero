@@ -83,7 +83,7 @@ export default function PlannerDetailPage() {
         <PlannerSidebar planner={planner} onUpdate={handlePlannerUpdate} />
       </aside>
       <main className="w-3/4 p-8">
-        <PlannerCalendar planner={planner} onDateClick={handleDateClick} />
+        <PlannerCalendar planner={planner} onDateClick={handleDateClick} onUpdate={handlePlannerUpdate} />
       </main>
       {isModalOpen && (
         <AssignStaffModal

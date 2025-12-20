@@ -4,7 +4,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
-import type { EventInput, DayCellContentArg } from '@fullcalendar/core';
+import type { EventInput, DayCellContentArg, EventDropArg } from '@fullcalendar/core';
 
 interface CalendarWrapperProps {
   startDate: string;
@@ -12,6 +12,7 @@ interface CalendarWrapperProps {
   monthCount: number;
   events: EventInput[];
   onDateClick: (arg: DateClickArg) => void;
+  onEventDrop: (arg: EventDropArg) => void;
   onExportPdf?: () => void;
   isExportingPdf?: boolean;
 }
@@ -31,6 +32,7 @@ export default function CalendarWrapper({
   monthCount,
   events,
   onDateClick,
+  onEventDrop,
   onExportPdf,
   isExportingPdf,
 }: CalendarWrapperProps) {
@@ -70,7 +72,9 @@ export default function CalendarWrapper({
       events={events}
       dateClick={onDateClick}
       dayCellClassNames={getDayCellClassNames}
-      editable={false}
+      editable={true}
+      eventDurationEditable={false}
+      eventDrop={onEventDrop}
       eventTextColor={"#000"}
     />
   );
