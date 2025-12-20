@@ -4,7 +4,7 @@ import { useMemo, useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ShiftPlanner } from '@/types';
 import type { DateClickArg } from '@fullcalendar/interaction';
-import type { EventInput, EventDropArg } from '@fullcalendar/core';
+import type { EventInput, EventDropArg, EventClickArg } from '@fullcalendar/core';
 import { differenceInCalendarMonths, format } from 'date-fns';
 import { formatDateToYYYYMMDD, parseDateString } from '@/utils/dates';
 import { generateCalendarPDF } from '@/utils/calendar-pdf';
@@ -78,6 +78,32 @@ export default function PlannerCalendar({ planner, onDateClick, onUpdate }: Plan
     }
   }, [planner, isExportingPdf]);
 
+  const handleEventClick = useCallback((arg: EventClickArg) => {
+    const eventId = arg.event.id;
+    // Event ID format: "YYYY-MM-DD::staffId"
+    const separatorIndex = eventId.indexOf('::');
+    if (separatorIndex === -1) return; // Background event (holiday), ignore
+
+    const date = eventId.substring(0, separatorIndex);
+    const staffId = eventId.substring(separatorIndex + 2);
+    const person = staff.find(s => s.id === staffId);
+
+    if (!person) return;
+
+    const confirmed = window.confirm(`¿Estás seguro de que deseas eliminar a ${person.name} de este día?`);
+    if (!confirmed) return;
+
+    const updatedAssignments = { ...assignments };
+    if (updatedAssignments[date]) {
+      updatedAssignments[date] = updatedAssignments[date].filter(id => id !== staffId);
+      if (updatedAssignments[date].length === 0) {
+        delete updatedAssignments[date];
+      }
+    }
+
+    onUpdate({ ...planner, assignments: updatedAssignments });
+  }, [assignments, staff, planner, onUpdate]);
+
   const events: EventInput[] = useMemo(() => {
     const eventList: EventInput[] = Object.entries(assignments).flatMap(([date, staffIds]) =>
       staffIds
@@ -122,6 +148,7 @@ export default function PlannerCalendar({ planner, onDateClick, onUpdate }: Plan
         events={events}
         onDateClick={onDateClick}
         onEventDrop={handleEventDrop}
+        onEventClick={handleEventClick}
         onExportPdf={handleExportPdf}
         isExportingPdf={isExportingPdf}
       />
