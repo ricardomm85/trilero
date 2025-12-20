@@ -4,7 +4,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
-import type { EventInput } from '@fullcalendar/core';
+import type { EventInput, DayCellContentArg } from '@fullcalendar/core';
 
 interface CalendarWrapperProps {
   startDate: string;
@@ -14,6 +14,15 @@ interface CalendarWrapperProps {
   onDateClick: (arg: DateClickArg) => void;
   onExportPdf?: () => void;
   isExportingPdf?: boolean;
+}
+
+/**
+ * Returns CSS class for day cells based on month parity
+ * Odd months get a light gray background, even months stay white
+ */
+function getDayCellClassNames(arg: DayCellContentArg): string[] {
+  const month = arg.date.getMonth(); // 0-indexed (Jan=0, Feb=1, etc.)
+  return month % 2 === 1 ? ['day-in-odd-month'] : [];
 }
 
 export default function CalendarWrapper({
@@ -60,6 +69,7 @@ export default function CalendarWrapper({
       }}
       events={events}
       dateClick={onDateClick}
+      dayCellClassNames={getDayCellClassNames}
       editable={false}
       eventTextColor={"#000"}
     />
